@@ -48,18 +48,8 @@ def main():
 
     dimenstions = x.shape[1]
 
-    config = MethodsConfiguration()
-
-    # config.SVM.C = determine_parameters_svm(x, y)
-
-    hid_neurons, solver, alpha = determine_parameters(ANN_optimizer(x,y))
-    config.ANN.hidden_neurons = hid_neurons
-    config.ANN.solver = solver
-    config.ANN.alpha = alpha
-
-    # (config.RandomForest.max_depth, config.RandomForest.n_estimators) = determine_parameters_forest(x, y)
-    # config.DecisionTree.max_depth = determine_parameters_tree(x, y)
-
+    config = determine_parameters_all(x, y)
+    
     exit()
 
     result_file_prefix = 'digits'
@@ -67,7 +57,22 @@ def main():
     test_data_set(x, y, result_file_prefix, dimenstions, config)
 
 
+def determine_parameters_all(x, y):
+    config = MethodsConfiguration()
 
+    config.SVM.C = determine_parameters(SVM_Optimizer(x, y))
+
+    hid_neurons, solver, alpha = determine_parameters(ANN_Optimizer(x,y))
+
+    config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x,y))
+
+    config.ANN.hidden_neurons = hid_neurons
+    config.ANN.solver = solver
+    config.ANN.alpha = alpha
+
+    config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x,y))
+
+    return config
 
 
 def test_data_set(X, Y, file_prefix, max_dimension, config):
@@ -128,7 +133,7 @@ def test_given_extraction_method(X, Y, reduction_object, file_prefix, max_dimens
         f.write(str(reduction_object.n_components) + "\t" + str(score) + "\n")
 
 def determine_parameters(optimizer):
-    optimizer.optimize()
+    return optimizer.optimize()
 
 def maybe_create_directory(path):
     if not os.path.exists(path):

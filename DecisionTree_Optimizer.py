@@ -1,6 +1,6 @@
 from hyperopt import fmin, tpe, hp
 from sklearn.model_selection import cross_val_score
-from sklearn import svm
+from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 
 from Optimizer import Optimizer
@@ -8,17 +8,24 @@ from Optimizer import Optimizer
 
 class DecisionTree_Optimizer(Optimizer):
 
-	def __init__(self, x, y, n_folds=10, C_begin=2**-5, C_end=2):
+	def __init__(self, x, y, n_folds=10, 
+				depth_begin=1, depth_end=10):
 
-		super(DecisionTree_optimizer, self).__init__(x, y, n_folds)
+		Optimizer.__init__(self, x, y, n_folds)
 
-		self._C_begin = C_begin
-		self._C_end = C_end
+		self._depth_begin = depth_begin
+		self._depth_end = depth_end
 
 		self._init_hyper_space()
 
 	def _init_hyper_space(self):
-		raise NotImplementedError('Should have implemented this')
+		self._hyper_space = hp.choice('depth', np.arange(self._depth_begin, self._depth_end + 1))
 	
 	def _objective(self, args):
-		raise NotImplementedError('Should have implemented this')
+		depth = args
+
+		tree = DecisionTreeClassifier(max_depth=depth)
+
+		score = - (np.mean(cross_val_score(tree, self._x, self._y, cv=self._n_folds))) # minus because it's minimization and we want to maximize
+
+		return score

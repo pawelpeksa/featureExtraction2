@@ -1,6 +1,6 @@
 from hyperopt import fmin, tpe, hp
 from sklearn.model_selection import cross_val_score
-from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 
 from Optimizer import Optimizer
@@ -8,18 +8,28 @@ from Optimizer import Optimizer
 
 class RandomForest_Optimizer(Optimizer):
 
-	def __init__(self, x, y, n_folds=10):
+	def __init__(self, x, y, n_folds=10, 
+				depth_begin=1, depth_end=10,
+				estimators_begin=2, estimators_end=10):
 
-		super(RandomForest_optimizer, self).__init__(x, y, n_folds)
+		Optimizer.__init__(self, x, y, n_folds)
 
-		self._n_folds = n_folds
-		self._C_begin = C_begin
-		self._C_end = C_end
+		self._depth_begin = depth_begin
+		self._depth_end = depth_end
+		self._estimators_begin = estimators_begin
+		self._estimators_end = estimators_end
 
 		self._init_hyper_space()
 
 	def _init_hyper_space(self):
-		raise NotImplementedError('Should have implemented this')
+		self._hyper_space = [hp.choice('depth', np.arange(self._depth_begin, self._depth_end + 1)),
+							hp.choice('estimators', np.arange(self._depth_begin, self._depth_end + 1))]
 	
 	def _objective(self, args):
-		raise NotImplementedError('Should have implemented this')
+		depth, estimators = args
+
+		forest = RandomForestClassifier(max_depth=depth, n_estimators=estimators)
+
+		score = - (np.mean(cross_val_score(forest, self._x, self._y, cv=self._n_folds))) # minus because it's minimization and we want to maximize
+
+		return score
