@@ -1,7 +1,11 @@
 import numpy as np
 import pandas as pd
 
-from SVM_optimizer import SVM_lin_optimizer
+from SVM_Optimizer import SVM_Optimizer
+from ANN_Optimizer import ANN_Optimizer
+from DecisionTree_Optimizer import DecisionTree_Optimizer
+from RandomForest_Optimizer import RandomForest_Optimizer
+
 from MethodsConfiguration import MethodsConfiguration
 
 from sklearn import decomposition, datasets
@@ -42,17 +46,25 @@ def main():
     x = digits.data
     y = digits.target
 
+    dimenstions = x.shape[1]
+
     config = MethodsConfiguration()
 
-    config.SVM.C = determine_parameters_svm(x, y)
+    # config.SVM.C = determine_parameters_svm(x, y)
 
-    # determine all parameters for all methods
-    
+    hid_neurons, solver, alpha = determine_parameters(ANN_optimizer(x,y))
+    config.ANN.hidden_neurons = hid_neurons
+    config.ANN.solver = solver
+    config.ANN.alpha = alpha
+
+    # (config.RandomForest.max_depth, config.RandomForest.n_estimators) = determine_parameters_forest(x, y)
+    # config.DecisionTree.max_depth = determine_parameters_tree(x, y)
+
     exit()
 
-    dimenstions = 64
+    result_file_prefix = 'digits'
 
-    test_data_set(x, y, "digits", dimenstions, config)
+    test_data_set(x, y, result_file_prefix, dimenstions, config)
 
 
 
@@ -86,7 +98,7 @@ def test_given_extraction_method(X, Y, reduction_object, file_prefix, max_dimens
                         alpha=config.ANN.alpha, 
                         hidden_layer_sizes=(config.ANN.hidden_neurons,), 
                         random_state=1, 
-                        learning_rate=‘adaptive’)
+                        learning_rate='adaptive')
 
     ann.fit(x_train, y_train)
 
@@ -115,24 +127,8 @@ def test_given_extraction_method(X, Y, reduction_object, file_prefix, max_dimens
         score = clf.score(x_test, y_test)
         f.write(str(reduction_object.n_components) + "\t" + str(score) + "\n")
 
-
-def determine_parameters_svm(x, y):
-    # svm_optimizer = SVM_lin_optimizer(x, y)
-    # return svm_optimizer.optimize()
-    return 1
-
-def determine_parameters_ann(x, y):
-    svm_optimizer = SVM_lin_optimizer(x, y)
-    return svm_optimizer.optimize()
-
-def determine_parameters_tree(x, y):
-    svm_optimizer = SVM_lin_optimizer(x, y)
-    return svm_optimizer.optimize()
-
-def determine_parameters_forest(x, y):
-    svm_optimizer = SVM_lin_optimizer(x, y)
-    return svm_optimizer.optimize()
-
+def determine_parameters(optimizer):
+    optimizer.optimize()
 
 def maybe_create_directory(path):
     if not os.path.exists(path):
