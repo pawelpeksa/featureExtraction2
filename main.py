@@ -44,6 +44,8 @@ def main():
 
 
 def calculate(x, y):
+    print 'calculate'
+
     dimenstions = x.shape[1]
 
     # hold out for test 
@@ -51,6 +53,7 @@ def calculate(x, y):
 
     # calculate for different train data size
     for train_data_size in range(300, 1501, 300):
+        print 'calculate for data amount:', train_data_size  
         # we don't need tmp1 and tmp2 because test set was extracted before
         x_train, tmp1, y_train, tmp2 = train_test_split(x, y, train_size=train_data_size, random_state=int(time.time()))
 
@@ -72,6 +75,7 @@ def prepare_dataset(x, y):
     return x_train, y_train
 
 def determine_parameters_all(x_train, y_train):
+    print "determine parameters"
     config = MethodsConfiguration()
 
     config.svm.C = determine_parameters(SVM_Optimizer(x_train, y_train))
@@ -166,6 +170,7 @@ def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
 
 
 def determine_parameters(optimizer):
+    print 'determine parameters', optimizer.__name__
     return optimizer.optimize()
 
 
