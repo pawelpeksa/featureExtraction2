@@ -24,85 +24,79 @@ import shutil
 import os
 
 result_folder = "./results/"
-
+ANN_MAX_ITER = 1 # TODO: change to 5000
 
 def main():
 
-    print "svm hyperopt"
     maybe_create_directory(result_folder)
 
-    # if os.path.exists(result_folder):
-    #     shutil.rmtree(result_folder)
-    # os.makedirs(result_folder)
-
-    # x, y = load_seeds()
-    # test_data_set(x, y, "seeds", 6)
-    #
-    
-    # iris = datasets.load_iris()
-
+    # 1797 samples in digits
     digits = datasets.load_digits(n_class=10)
 
-    x = digits.data
-    y = digits.target
+    x_train = digits.data
+    y_train = digits.target
 
-    dimenstions = x.shape[1]
+    dimenstions = x_train.shape[1]
 
-    config = determine_parameters_all(x, y)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.3, random_state=0)
+
+    print x_train.shape
+    print y_train.shape
+    print x_test.shape
+    print y_test.shape
+
+    config = determine_parameters_all(x_train, y_train)
     
-    exit()
-
     result_file_prefix = 'digits'
 
-    test_data_set(x, y, result_file_prefix, dimenstions, config)
+    test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, dimenstions, config)
 
 
-def determine_parameters_all(x, y):
+def determine_parameters_all(x_train, y_train):
     config = MethodsConfiguration()
 
-    config.SVM.C = determine_parameters(SVM_Optimizer(x, y))
+    # config.SVM.C = determine_parameters(SVM_Optimizer(x_train, y_train))
+    # config.ANN.hidden_neurons, config.ANN.solver, config.ANN.alpha = determine_parameters(ANN_Optimizer(x_train,y_train))
+    # config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x_train,y_train))
+    # config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x_train,y_train))
 
-    hid_neurons, solver, alpha = determine_parameters(ANN_Optimizer(x,y))
-
-    config.ANN.hidden_neurons = hid_neurons
-    config.ANN.solver = solver
-    config.ANN.alpha = alpha
-
-    config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x,y))
-
-    config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x,y))
-
-    print config.ANN.__dict__
-    print config.RandomForest.__dict__
+    config.SVM.C = 1
+    config.ANN.hidden_neurons, config.ANN.solver, config.ANN.alpha = 15, 'adam', 0.5
+    config.DecisionTree.max_depth = '5'
+    config.RandomForest.max_depth, config.RandomForest.n_estimators = 5, 5
 
     return config
 
 
-def test_data_set(X, Y, file_prefix, max_dimension, config):
+def test_data_set(x_train, y_train, x_test, y_test, file_prefix, max_dimension, config):
+
     for i in range(1, max_dimension + 1):
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        test_given_extraction_method(X, Y, pca, file_prefix, max_dimension, config)
-        test_given_extraction_method(X, Y, lda, file_prefix, max_dimension, config)
+        test_given_extraction_method(x_train, y_train, x_test, y_test, pca, file_prefix, max_dimension, config)
+        test_given_extraction_method(x_train, y_train, x_test, y_test, lda, file_prefix, max_dimension, config)
 
 
-def test_given_extraction_method(X, Y, reduction_object, file_prefix, max_dimension, config):
-    test_size = 0.5
+def reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object):
+    x_train = reduction_object.fit(x_train, y_train).transform(x_train)
+    x_test = reduction_object.fit(x_test, y_test).transform(x_test)
 
-    if reduction_object.n_components < max_dimension:
-        X = reduction_object.fit(X, Y).transform(X)
+    return x_train, x_test
 
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=test_size, random_state=0)
+def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_object, file_prefix, max_dimension, config):
+
+    x_train, x_test = reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object)
 
     print "Components:", reduction_object.n_components, "\n"
 
-    SVM = svm.SVC(kernel='rbf', C=1).fit(x_train, y_train)
+    SVM = svm.SVC(kernel='linear', C=1).fit(x_train, y_train)
     score_1 = SVM.score(x_test, y_test)
+
     print "svm", score_1, "\n"
 
     ann = MLPClassifier(solver=config.ANN.solver, 
-                        max_iter=ann_max_iter, 
+                        max_iter=ANN_MAX_ITER, 
                         alpha=config.ANN.alpha, 
                         hidden_layer_sizes=(config.ANN.hidden_neurons,), 
                         random_state=1, 
@@ -142,16 +136,34 @@ def maybe_create_directory(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def load_seeds():
-    data = pd.read_csv('seeds_dataset.txt', delim_whitespace=True, dtype="float64")
-
-    np_data = data.as_matrix()
-
-    x = np_data[:, 0:6]
-    y = np_data[:, [7]]
-    y = np.ravel(y)
-
-    return x, y        
-
 
 main()
+
+
+
+# BACKUP (it may be needed in the future)
+
+# def load_seeds():
+#     data = pd.read_csv('seeds_dataset.txt', delim_whitespace=True, dtype="float64")
+
+#     np_data = data.as_matrix()
+
+#     x_train = np_data[:, 0:6]
+#     y_train = np_data[:, [7]]
+#     y_train = np.ravel(y_train)
+
+#     return x_train, y_train        
+
+# if os.path.exists(result_folder):
+    #     shutil.rmtree(result_folder)
+    # os.makedirs(result_folder)
+
+    # x_train, y_train = load_seeds()
+    # test_data_set(x_train, y_train, "seeds", 6)
+    #
+    
+    # iris = datasets.load_iris()    
+
+
+
+
