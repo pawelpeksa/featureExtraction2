@@ -21,7 +21,7 @@ class SVM:
 class ANN:
 	def __init__(self):
 		self.hidden_neurons = 0
-		self.solver = ""
+		self.solver = ''
 		self.alpha = 0
 	
 class RandomForest:

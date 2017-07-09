@@ -60,7 +60,7 @@ def calculate(x, y):
 
         suffix = str(train_data_size)
 
-        save_methods_config(config, 'methods_config_' + suffix + 'dat')
+        save_methods_config(config, 'methods_config_' + suffix + '.dat')
 
         result_file_prefix = 'digits_' + suffix
 
@@ -73,13 +73,13 @@ def prepare_dataset(x, y):
 
 def determine_parameters_all(x_train, y_train):
     config = MethodsConfiguration()
-
+    # TODO: uncomment
     # config.SVM.C = determine_parameters(SVM_Optimizer(x_train, y_train))
     # config.ANN.hidden_neurons, config.ANN.solver, config.ANN.alpha = determine_parameters(ANN_Optimizer(x_train,y_train))
     # config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x_train,y_train))
     # config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x_train,y_train))
 
-    config.svm;C = 1
+    config.svm.C = 1
     config.ann.hidden_neurons, config.ann.solver, config.ann.alpha = 15, 'adam', 0.5
     config.decision_tree.max_depth = 5
     config.random_forest.max_depth, config.random_forest.n_estimators = 5, 5
@@ -111,49 +111,69 @@ def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_obj
 
     x_train, x_test = reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object)
 
-    print "Components:", reduction_object.n_components, ' ', file_prefix, '\n'
+    print 'Method:' + str(type(reduction_object).__name__),'Components:' + str(reduction_object.n_components), file_prefix, '\n'
 
-    SVM = svm.SVC(kernel='linear', C=1).fit(x_train, y_train)
-    score_1 = SVM.score(x_test, y_test)
+    svm_scores = list()
+    ann_scores = list()
+    decision_tree_scores = list()
+    random_forest_scores = list()
 
-    print "svm", score_1, "\n"
+    # do it 5 times for statistics
+    for i in range(1,6):
+        svm_score = fit_and_score_svm(x_train, y_train, x_test, y_test, config)
+        ann_score = fit_and_score_ann(x_train, y_train, x_test, y_test, config)
+        decision_tree_score = fit_and_score_decision_tree(x_train, y_train, x_test, y_test, config)
+        random_forest_score = fit_and_score_random_forest(x_train, y_train, x_test, y_test, config)
 
+        svm_scores.append(svm_score)
+        ann_scores.append(ann_score)
+        decision_tree_scores.append(decision_tree_score)
+        random_forest_scores.append(random_forest_score)
+        
+    save_results(file_prefix, 'svm', reduction_object, svm_scores)
+    save_results(file_prefix, 'ann', reduction_object, ann_scores)
+    save_results(file_prefix, 'forest', reduction_object, random_forest_scores)
+    save_results(file_prefix, 'tree', reduction_object, decision_tree_scores)
+
+
+def save_results(file_prefix, method_name, reduction_object, scores):
+    with open(result_folder + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat', 'a') as output:
+        output.write(str(reduction_object.n_components) + "\t" + str(np.mean(scores)) + '\t' + str(np.std(scores)) + '\n')   
+
+
+def fit_and_score_svm(x_train, y_train, x_test, y_test, config):
+    SVM = svm.SVC(kernel='linear', C=1)
+    SVM.fit(x_train, y_train)
+    return SVM.score(x_test, y_test)
+
+
+def fit_and_score_ann(x_train, y_train, x_test, y_test, config):
     ann = MLPClassifier(solver=config.ann.solver, 
-                        max_iter=ANN_MAX_ITER, 
-                        alpha=config.ann.alpha, 
-                        hidden_layer_sizes=(config.ann.hidden_neurons,), 
-                        random_state=1, 
-                        learning_rate='adaptive')
+                            max_iter=ANN_MAX_ITER, 
+                            alpha=config.ann.alpha, 
+                            hidden_layer_sizes=(config.ann.hidden_neurons,), 
+                            random_state=1, 
+                            learning_rate='adaptive')
 
     ann.fit(x_train, y_train)
+    return ann.score(x_test, y_test)
 
-    score_2 = ann.score(x_test, y_test)
-    print "ann", score_2, "\n"
 
-    forest = RandomForestClassifier(max_depth=config.random_forest.max_depth, n_estimators=config.random_forest.n_estimators).fit(x_train, y_train)
-    score_3 = forest.score(x_test, y_test)
-    print "random forest", score_3, "\n"
-
+def fit_and_score_decision_tree(x_train, y_train, x_test, y_test, config):
     tree = DecisionTreeClassifier(max_depth=config.decision_tree.max_depth).fit(x_train, y_train)
-    score_4 = tree.score(x_test, y_test)
-    print "decision tree", score_4, "\n"
+    tree.fit(x_train, y_train)
+    return tree.score(x_test, y_test)
 
-    files_mode = "w"
 
-    svm_file = open(result_folder + file_prefix + "_svm_" + str(type(reduction_object).__name__) + ".dat", files_mode)
-    ann_file = open(result_folder + file_prefix + "_ann_" + str(type(reduction_object).__name__) + ".dat", files_mode)
-    forest_file = open(result_folder + file_prefix + "_forest_" + str(type(reduction_object).__name__) + ".dat", files_mode)
-    tree_file = open(result_folder + file_prefix + "_tree_" + str(type(reduction_object).__name__) + ".dat", files_mode)
+def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
+    forest = RandomForestClassifier(max_depth=config.random_forest.max_depth, n_estimators=config.random_forest.n_estimators)
+    forest.fit(x_train, y_train)
+    return forest.score(x_test, y_test)
 
-    clfs = [SVM, ann, forest, tree]
-    files = [svm_file, ann_file, forest_file, tree_file]
-
-    for clf, f in zip(clfs, files):
-        score = clf.score(x_test, y_test)
-        f.write(str(reduction_object.n_components) + "\t" + str(score) + "\n")
 
 def determine_parameters(optimizer):
     return optimizer.optimize()
+
 
 def maybe_create_directory(path):
     if not os.path.exists(path):
@@ -161,32 +181,4 @@ def maybe_create_directory(path):
 
 
 main()
-
-
-
-# BACKUP (it may be needed in the future)
-
-# def load_seeds():
-#     data = pd.read_csv('seeds_dataset.txt', delim_whitespace=True, dtype="float64")
-
-#     np_data = data.as_matrix()
-
-#     x_train = np_data[:, 0:6]
-#     y_train = np_data[:, [7]]
-#     y_train = np.ravel(y_train)
-
-#     return x_train, y_train        
-
-# if os.path.exists(result_folder):
-    #     shutil.rmtree(result_folder)
-    # os.makedirs(result_folder)
-
-    # x_train, y_train = load_seeds()
-    # test_data_set(x_train, y_train, "seeds", 6)
-    #
-    
-    # iris = datasets.load_iris()    
-
-
-
 
