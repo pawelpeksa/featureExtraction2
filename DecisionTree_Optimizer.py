@@ -5,6 +5,7 @@ import numpy as np
 
 from Optimizer import Optimizer
 
+DEPTH_KEY = 'depth'
 
 class DecisionTree_Optimizer(Optimizer):
 
@@ -19,7 +20,7 @@ class DecisionTree_Optimizer(Optimizer):
 		self._init_hyper_space()
 
 	def _init_hyper_space(self):
-		self._hyper_space = hp.choice('depth', np.arange(self._depth_begin, self._depth_end + 1))
+		self._hyper_space = hp.choice(DEPTH_KEY, np.arange(self._depth_begin, self._depth_end + 1))
 	
 	def _objective(self, args):
 		depth = args
@@ -29,3 +30,8 @@ class DecisionTree_Optimizer(Optimizer):
 		score = - (np.mean(cross_val_score(tree, self._x, self._y, cv=self._n_folds))) # minus because it's minimization and we want to maximize
 
 		return score
+
+	def optimize(self):
+		result = Optimizer.optimize(self)
+		return result[DEPTH_KEY]
+		

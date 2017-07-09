@@ -64,13 +64,16 @@ def determine_parameters_all(x, y):
 
     hid_neurons, solver, alpha = determine_parameters(ANN_Optimizer(x,y))
 
-    config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x,y))
-
     config.ANN.hidden_neurons = hid_neurons
     config.ANN.solver = solver
     config.ANN.alpha = alpha
 
+    config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x,y))
+
     config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x,y))
+
+    print config.ANN.__dict__
+    print config.RandomForest.__dict__
 
     return config
 

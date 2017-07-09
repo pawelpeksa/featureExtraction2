@@ -5,6 +5,9 @@ import numpy as np
 
 from Optimizer import Optimizer
 
+SOLVER_KEY = 'solver'
+ALPHA_KEY = 'alpha'
+HIDDEN_NEURONS_KEY = 'hidden_neurons' 
 
 class ANN_Optimizer(Optimizer):
 
@@ -25,9 +28,9 @@ class ANN_Optimizer(Optimizer):
 		self._init_hyper_space()
 
 	def _init_hyper_space(self):
-		self._hyper_space = [hp.choice('hidden_neurons', np.arange(self._hid_neurons_begin, self._hid_neurons_end + 1)), 
-							hp.choice('solver', self._solvers), 
-							hp.uniform('alpha', self._alpha_begin, self._alpha_end)]
+		self._hyper_space = [hp.choice(HIDDEN_NEURONS_KEY, np.arange(self._hid_neurons_begin, self._hid_neurons_end + 1)), 
+							hp.choice(SOLVER_KEY, self._solvers), 
+							hp.uniform(ALPHA_KEY, self._alpha_begin, self._alpha_end)]
 	
 	def _objective(self, args):
 		hidden_neurons, solver, alpha = args
@@ -46,9 +49,9 @@ class ANN_Optimizer(Optimizer):
 	def optimize(self):
 		result = Optimizer.optimize(self)
 		result = self.replace_solver_number_with_name(result)
-		return result;
+		return result[HIDDEN_NEURONS_KEY], result[SOLVER_KEY], result[ALPHA_KEY]
 
 	def replace_solver_number_with_name(self, result):	
-		result['solver'] = self._solvers[result['solver']]
+		result[SOLVER_KEY] = self._solvers[result[SOLVER_KEY]]
 		return result
 		
