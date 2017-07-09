@@ -1,2 +1,2 @@
 *.pyc
-results/*.dat
+results*/*.dat

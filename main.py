@@ -9,6 +9,7 @@ from DecisionTree_Optimizer import DecisionTree_Optimizer
 from RandomForest_Optimizer import RandomForest_Optimizer
 
 from MethodsConfiguration import MethodsConfiguration
+from Configuration import Configuration
 
 from sklearn import decomposition, datasets
 from sklearn import svm
@@ -26,7 +27,6 @@ import shutil
 import os
 
 result_folder = "./results"
-ANN_MAX_ITER = 1 # TODO: change to 5000
 
 def main():
 
@@ -73,16 +73,11 @@ def prepare_dataset(x, y):
 
 def determine_parameters_all(x_train, y_train):
     config = MethodsConfiguration()
-    # TODO: uncomment
-    # config.SVM.C = determine_parameters(SVM_Optimizer(x_train, y_train))
-    # config.ANN.hidden_neurons, config.ANN.solver, config.ANN.alpha = determine_parameters(ANN_Optimizer(x_train,y_train))
-    # config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x_train,y_train))
-    # config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x_train,y_train))
 
-    config.svm.C = 1
-    config.ann.hidden_neurons, config.ann.solver, config.ann.alpha = 15, 'adam', 0.5
-    config.decision_tree.max_depth = 5
-    config.random_forest.max_depth, config.random_forest.n_estimators = 5, 5
+    config.svm.C = determine_parameters(SVM_Optimizer(x_train, y_train))
+    config.ann.hidden_neurons, config.ann.solver, config.ann.alpha = determine_parameters(ANN_Optimizer(x_train,y_train))
+    config.decision_tree.max_depth = determine_parameters(DecisionTree_Optimizer(x_train,y_train))
+    config.random_forest.max_depth, config.random_forest.n_estimators = determine_parameters(RandomForest_Optimizer(x_train,y_train))
 
     return config
 
@@ -149,11 +144,10 @@ def fit_and_score_svm(x_train, y_train, x_test, y_test, config):
 
 def fit_and_score_ann(x_train, y_train, x_test, y_test, config):
     ann = MLPClassifier(solver=config.ann.solver, 
-                            max_iter=ANN_MAX_ITER, 
-                            alpha=config.ann.alpha, 
-                            hidden_layer_sizes=(config.ann.hidden_neurons,), 
-                            random_state=1, 
-                            learning_rate='adaptive')
+                        max_iter=Configuration.ANN_MAX_ITERATIONS, 
+                        alpha=config.ann.alpha, 
+                        hidden_layer_sizes=(config.ann.hidden_neurons,), 
+                        learning_rate='adaptive')
 
     ann.fit(x_train, y_train)
     return ann.score(x_test, y_test)
