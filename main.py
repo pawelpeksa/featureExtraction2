@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import time
+import json
 
 from SVM_Optimizer import SVM_Optimizer
 from ANN_Optimizer import ANN_Optimizer
@@ -33,24 +35,26 @@ def main():
     # 1797 samples in digits
     digits = datasets.load_digits(n_class=10)
 
-    x_train = digits.data
-    y_train = digits.target
+    x = digits.data
+    y = digits.target
 
-    dimenstions = x_train.shape[1]
+    dimenstions = x.shape[1]
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.3, random_state=0)
+    x, y = prepare_dataset(x, y)
 
-    print x_train.shape
-    print y_train.shape
-    print x_test.shape
-    print y_test.shape
+    # split data for train and test
 
-    config = determine_parameters_all(x_train, y_train)
+    config = determine_parameters_all(x, y)
     
     result_file_prefix = 'digits'
 
     test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, dimenstions, config)
 
+
+def prepare_dataset(x, y):
+    # get 1700 out of 1797 samples
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1700, random_state=int(time.time()))
+    return x_train, y_train
 
 def determine_parameters_all(x_train, y_train):
     config = MethodsConfiguration()
@@ -60,12 +64,18 @@ def determine_parameters_all(x_train, y_train):
     # config.DecisionTree.max_depth = determine_parameters(DecisionTree_Optimizer(x_train,y_train))
     # config.RandomForest.max_depth, config.RandomForest.n_estimators = determine_parameters(RandomForest_Optimizer(x_train,y_train))
 
-    config.SVM.C = 1
-    config.ANN.hidden_neurons, config.ANN.solver, config.ANN.alpha = 15, 'adam', 0.5
-    config.DecisionTree.max_depth = '5'
-    config.RandomForest.max_depth, config.RandomForest.n_estimators = 5, 5
+    config.svm;C = 1
+    config.ann.hidden_neurons, config.ann.solver, config.ann.alpha = 15, 'adam', 0.5
+    config.decision_tree.max_depth = '5'
+    config.random_forest.max_depth, config.random_forest.n_estimators = 5, 5
+
+    save_methods_config(config)
 
     return config
+
+def save_methods_config(config):
+    with open('methods_config.dat', 'w') as output:
+        json.dump(config.toDict(), output)    
 
 
 def test_data_set(x_train, y_train, x_test, y_test, file_prefix, max_dimension, config):
