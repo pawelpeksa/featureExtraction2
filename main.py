@@ -25,12 +25,12 @@ import sys
 import shutil
 import os
 
-result_folder = "./results/"
+result_folder = "./results"
 ANN_MAX_ITER = 1 # TODO: change to 5000
 
 def main():
 
-    maybe_create_directory(result_folder)
+    set_results_directory()
 
     # 1797 samples in digits
     digits = datasets.load_digits(n_class=10)
@@ -137,7 +137,7 @@ def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_obj
 
 
 def save_results(file_prefix, method_name, reduction_object, scores):
-    with open(result_folder + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat', 'a') as output:
+    with open(result_folder + '/' + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat', 'a') as output:
         output.write(str(reduction_object.n_components) + "\t" + str(np.mean(scores)) + '\t' + str(np.std(scores)) + '\n')   
 
 
@@ -175,10 +175,16 @@ def determine_parameters(optimizer):
     return optimizer.optimize()
 
 
-def maybe_create_directory(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+def set_results_directory():
+    global result_folder
 
+    for i in range(0,10000):
 
+        new_name = result_folder + str(i)
+        if not os.path.exists(new_name):
+            os.makedirs(new_name)
+            result_folder = new_name
+            return
+         
 main()
 
