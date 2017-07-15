@@ -1,6 +1,8 @@
 from hyperopt import fmin, tpe, hp
 from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
+from Configuration import Configuration
+
 import numpy as np
 
 from Optimizer import Optimizer
@@ -24,7 +26,6 @@ class ANN_Optimizer(Optimizer):
 		self._alpha_end= alpha_end		
 
 		self._solvers = ['lbfgs', 'sgd', 'adam']
-
 		self._init_hyper_space()
 
 	def _init_hyper_space(self):
@@ -36,7 +37,7 @@ class ANN_Optimizer(Optimizer):
 		hidden_neurons, solver, alpha = args
 
 		ann = MLPClassifier(solver=solver, 
-                        max_iter=1000, 
+                        max_iter=Configuration.ANN_OPIMIZER_MAX_ITERATIONS, 
                         alpha=alpha, 
                         hidden_layer_sizes=(hidden_neurons,), 
                         random_state=1, 
