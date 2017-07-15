@@ -170,7 +170,7 @@ def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
 
 
 def determine_parameters(optimizer):
-    print 'determine parameters', optimizer.__name__
+    print 'determine parameters', optimizer.__class__.__name__
     return optimizer.optimize()
 
 
