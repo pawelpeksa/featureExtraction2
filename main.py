@@ -28,7 +28,7 @@ import os
 result_folder = "./results"
 
 def main():
-
+    print 'feature extraction example 0.1'
     set_results_directory()
 
     # 1797 samples in digits
@@ -51,7 +51,8 @@ def calculate(x, y):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=200, random_state=int(time.time()))
 
     # calculate for different train data size
-    for train_data_size in range(300, 1501, 300):
+    # for train_data_size in range(300, 1501, 300):
+    for train_data_size in range(300, 601, 300):
         print 'calculate for data amount:', train_data_size  
         # we don't need tmp1 and tmp2 because test set was extracted before
         x_train, tmp1, y_train, tmp2 = train_test_split(x, y, train_size=train_data_size, random_state=int(time.time()))
