@@ -1,14 +1,12 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 
 
-
 def main():
 	print "Plot generator 0.1"
-
-	matplotlib.rc('font', family='Arial')
 
 	directory = './results0/' 
 	set_name = 'digits'
@@ -23,38 +21,47 @@ def plot_and_save_all_ml_methods(directory = './results0/', set_name = 'digits',
 	ml_methods = ['ann', 'svm', 'forest', 'tree']
 	colors = ['r', 'g', 'b', 'y']
 	
-	plt.figure().set_size_inches(8, 7)
-	plt.title(u'Zależność skuteczności od wymiaru danych\n przy zastosowaniu metody ' + reduction_method + u'\ndla ilości danych N=' + x_num)
+	fig = plt.figure()
+
+	fig, ax = plt.subplots()
+
+	fig.set_size_inches(8, 6)
+	
 
 	for ml_method, color in zip(ml_methods, colors):
 		data_path = construct_path(directory, set_name, x_num, ml_method, reduction_method)
-		plot_from_file(data_path, color, ml_method)
+		plot_from_file(ax, data_path, color)
 
-	plt.xticks(np.arange(0, 64, 5))
 
-	plt.legend(framealpha=0.5, loc='best')
 	plt.savefig(construct_path('./results0/plots/', set_name, x_num, 'all', reduction_method, '_', format))
 
 def construct_path(directory='./results0/', set_name = 'digits', x_num='1500', ml_method = 'svm', reduction_method='PCA', sep = '_', suffix = '.dat'):
 	return directory + set_name + sep + x_num + sep + ml_method + sep + reduction_method + suffix
 
-def plot_from_file(file_name, color = 'b', label = 'label'):
+def plot_from_file(ax, file_name, color = 'b'):
 	data = read_data(file_name)
 	feature_nums, scores, stds = prepare_data(data)
 	
 
 	scores, stds = np.array(scores), np.array(stds)
 
-	plt.plot(feature_nums, scores, color = color, label=label)
+	ax.plot(feature_nums, scores, color = color)
 
-	plt.fill_between(feature_nums, scores + stds, scores - stds, alpha=0.2, color = color)
+	ax.set_xscale('log')
 
-	plt.ylabel(u'Skuteczność +/- odchylenie standardowe')
-	plt.xlabel('Wymiar danych')
+	ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
-	plt.axhline(np.max(scores), linestyle='--', color=color)
+	ax.set_xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 30, 64])
+
+	ax.fill_between(feature_nums, scores + stds, scores - stds, alpha=0.2, color = color)
+
+	plt.ylabel(u'skuteczność +/- odchyelenie standardowe')
+	plt.xlabel(u'liczba atrybutów')
+
+	ax.axhline(np.max(scores), linestyle='--', color=color)
 
 	plt.xlim([feature_nums[0], feature_nums[-1]])
+
 	# plt.ylim([0, np.max(scores) + 0.01]) # worst score - its std goes under 0, should y lim be set to y= [0, smth] ?
 
 def read_data(file_name):
