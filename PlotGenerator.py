@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import matplotlib
+matplotlib.rc('font', family='Arial')
 import numpy as np
 
 
@@ -67,7 +68,7 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, color = 'b'):
 
 	plt.xlim([feature_nums[0], feature_nums[-1]])
 	plt.legend(loc="lower right", ncol=2)
-	
+
 	# plt.ylim([0, np.max(scores) + 0.01]) # worst score - its std goes under 0, should y lim be set to y= [0, smth] ?
 
 def read_data(file_name):
