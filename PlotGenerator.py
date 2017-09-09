@@ -30,7 +30,7 @@ def plot_and_save_all_ml_methods(directory = './results0/', set_name = 'digits',
 
 	for ml_method, color in zip(ml_methods, colors):
 		data_path = construct_path(directory, set_name, x_num, ml_method, reduction_method)
-		plot_from_file(ax, data_path, color)
+		plot_from_file(ax, ml_method, data_path, reduction_method, color)
 
 
 	plt.savefig(construct_path('./results0/plots/', set_name, x_num, 'all', reduction_method, '_', format))
@@ -38,14 +38,14 @@ def plot_and_save_all_ml_methods(directory = './results0/', set_name = 'digits',
 def construct_path(directory='./results0/', set_name = 'digits', x_num='1500', ml_method = 'svm', reduction_method='PCA', sep = '_', suffix = '.dat'):
 	return directory + set_name + sep + x_num + sep + ml_method + sep + reduction_method + suffix
 
-def plot_from_file(ax, file_name, color = 'b'):
+def plot_from_file(ax, ml_method, file_name, reduction_method, color = 'b'):
 	data = read_data(file_name)
 	feature_nums, scores, stds = prepare_data(data)
 	
 
 	scores, stds = np.array(scores), np.array(stds)
 
-	ax.plot(feature_nums, scores, color = color)
+	ax.plot(feature_nums, scores, color = color, label=ml_method)
 
 	ax.set_xscale('log')
 
@@ -55,13 +55,19 @@ def plot_from_file(ax, file_name, color = 'b'):
 
 	ax.fill_between(feature_nums, scores + stds, scores - stds, alpha=0.2, color = color)
 
+	if reduction_method == 'PCA':
+		plt.title(u'Zależność skuteczności od liczby atrybutów dla PCA')
+	else:
+		plt.title(u'Zależność skuteczności od liczby atrybutów dla LDA')
+
 	plt.ylabel(u'skuteczność +/- odchyelenie standardowe')
 	plt.xlabel(u'liczba atrybutów')
 
 	ax.axhline(np.max(scores), linestyle='--', color=color)
 
 	plt.xlim([feature_nums[0], feature_nums[-1]])
-
+	plt.legend(loc="lower right", ncol=2)
+	
 	# plt.ylim([0, np.max(scores) + 0.01]) # worst score - its std goes under 0, should y lim be set to y= [0, smth] ?
 
 def read_data(file_name):
