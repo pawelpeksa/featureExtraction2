@@ -64,6 +64,13 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, color = 'b'):
 	plt.ylabel(u'skuteczność +/- odchyelenie standardowe')
 	plt.xlabel(u'liczba atrybutów')
 
+	bestScore = np.max(scores)
+	bestIndex = scores.tolist().index(bestScore)
+
+	print "Best for method: {0} is {1} for {2} features".format(ml_method, bestScore, feature_nums[bestIndex])
+	print "Score for 64 features is: {0} is {1}".format(ml_method, scores[len(scores)-1])
+	print ""
+
 	ax.axhline(np.max(scores), linestyle='--', color=color)
 
 	plt.xlim([feature_nums[0], feature_nums[-1]])
