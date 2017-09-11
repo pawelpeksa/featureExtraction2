@@ -112,7 +112,7 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color = 'b
 	print '$' + str(round_to_2_decimal(bestScore)) + ' \pm ' + str(round_to_2_decimal(stds[bestIndex])) + '$ & $'  + str(int(feature_nums[bestIndex])) + '$ & $ ' + str(x_num) + ' $ & ' + red_met_str + ' & ' + ml_method + ' \\\\'
 	print "\hline"
 	print rowcolor	
-	print '$' + str(round_to_2_decimal(scores[len(scores)-1])) + ' \pm ' + str(round_to_2_decimal(stds[len(scores)-1])) + '$ & $' + str(int(64)) + '$ & $ ' + str(x_num) + ' $ & ' + red_met_str + ' & ' + ml_method + ' \\\\'
+	print '$' + str(round_to_2_decimal(scores[len(scores)-1])) + ' \pm ' + str(round_to_2_decimal(stds[len(scores)-1])) + '$ & $' + str(int(64)) + '$ & $ ' + str(x_num) + ' $ & ' + '-' + ' & ' + ml_method + ' \\\\'
 
 
 	betterPerformance = bestScore - scores[len(scores)-1]
