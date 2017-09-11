@@ -5,6 +5,15 @@ import matplotlib
 matplotlib.rc('font', family='Arial')
 import numpy as np
 
+pca300 = []
+lda300 = []
+pca600 = []
+lda600 = []
+
+
+def round_to_2_decimal(value):
+	return round(value * 100, 2)
+
 
 def main():
 	print "Plot generator 0.1"
@@ -17,6 +26,16 @@ def main():
 	for x_num in x_nums:
 		plot_and_save_all_ml_methods(directory, set_name, x_num, 'PCA', '.pdf')	
 		plot_and_save_all_ml_methods(directory, set_name, x_num, 'LinearDiscriminantAnalysis', '.pdf')	
+
+	global pca300
+	global lda300
+	global pca600
+	global lda600 
+
+	print "Better performance for {0} {1} is : {2}".format('PCA', '300', round_to_2_decimal(np.mean(pca300)))
+	print "Better performance for {0} {1} is : {2}".format('LDA', '300', round_to_2_decimal(np.mean(lda300)))
+	print "Better performance for {0} {1} is : {2}".format('PCA', '600', round_to_2_decimal(np.mean(pca600)))
+	print "Better performance for {0} {1} is : {2}".format('LDA', '600', round_to_2_decimal(np.mean(lda600)))
 
 def plot_and_save_all_ml_methods(directory = './results0/', set_name = 'digits', x_num = '1500', reduction_method = 'PCA', format = '.pdf'):
 	ml_methods = ['ann', 'svm', 'forest', 'tree']
@@ -31,7 +50,7 @@ def plot_and_save_all_ml_methods(directory = './results0/', set_name = 'digits',
 
 	for ml_method, color in zip(ml_methods, colors):
 		data_path = construct_path(directory, set_name, x_num, ml_method, reduction_method)
-		plot_from_file(ax, ml_method, data_path, reduction_method, color)
+		plot_from_file(ax, ml_method, data_path, reduction_method, x_num, color)
 
 
 	plt.savefig(construct_path('./results0/plots/', set_name, x_num, 'all', reduction_method, '_', format))
@@ -39,7 +58,12 @@ def plot_and_save_all_ml_methods(directory = './results0/', set_name = 'digits',
 def construct_path(directory='./results0/', set_name = 'digits', x_num='1500', ml_method = 'svm', reduction_method='PCA', sep = '_', suffix = '.dat'):
 	return directory + set_name + sep + x_num + sep + ml_method + sep + reduction_method + suffix
 
-def plot_from_file(ax, ml_method, file_name, reduction_method, color = 'b'):
+i = 0
+
+
+
+
+def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color = 'b'):
 	data = read_data(file_name)
 	feature_nums, scores, stds = prepare_data(data)
 	
@@ -67,9 +91,51 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, color = 'b'):
 	bestScore = np.max(scores)
 	bestIndex = scores.tolist().index(bestScore)
 
-	print "Best for method: {0} is {1} for {2} features".format(ml_method, bestScore, feature_nums[bestIndex])
-	print "Score for 64 features is: {0} is {1}".format(ml_method, scores[len(scores)-1])
-	print ""
+	red_met_str = ''
+
+	if (reduction_method=='PCA'):
+		red_met_str = 'PCA'
+	else:
+		red_met_str = 'LDA'
+
+	global i 
+
+	if i %2 == 0:
+		rowcolor = '\\rowcolor{Gray}'
+	else:
+		rowcolor = '\\rowcolor{White}'
+
+	i += 1	
+
+		
+	print rowcolor	
+	print '$' + str(round_to_2_decimal(bestScore)) + ' \pm ' + str(round_to_2_decimal(stds[bestIndex])) + '$ & $'  + str(int(feature_nums[bestIndex])) + '$ & $ ' + str(x_num) + ' $ & ' + red_met_str + ' & ' + ml_method + ' \\\\'
+	print "\hline"
+	print rowcolor	
+	print '$' + str(round_to_2_decimal(scores[len(scores)-1])) + ' \pm ' + str(round_to_2_decimal(stds[len(scores)-1])) + '$ & $' + str(int(64)) + '$ & $ ' + str(x_num) + ' $ & ' + red_met_str + ' & ' + ml_method + ' \\\\'
+
+
+	betterPerformance = bestScore - scores[len(scores)-1]
+
+	global pca300
+	global lda300
+	global pca600
+	global lda600 
+
+
+	if red_met_str == 'PCA' and str(x_num) == str(300):
+		pca300.append(betterPerformance)
+	if red_met_str == 'LDA' and str(x_num) == str(300):
+		lda300.append(betterPerformance)
+	if red_met_str == 'PCA' and str(x_num) == str(600):
+		pca600.append(betterPerformance)
+	if red_met_str == 'LDA' and str(x_num) == str(600):
+		lda600.append(betterPerformance)
+
+	# print "Best for method: {0} is {1} for {2} features".format(ml_method, bestScore, feature_nums[bestIndex])
+	# print "Score for 64 features is: {0} is {1}".format(ml_method, scores[len(scores)-1])
+	print "\hline"
+
 
 	ax.axhline(np.max(scores), linestyle='--', color=color)
 
