@@ -1,6 +1,8 @@
 import numpy as np
 import time
 import json
+import logging
+import os
 
 from SVM_Optimizer import SVM_Optimizer
 from ANN_Optimizer import ANN_Optimizer
@@ -18,18 +20,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.decomposition import PCA
 
-from pprint import pprint
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
-import sys
-import shutil
-import os
-
 result_folder = "./results"
+
 
 def main():
     print 'feature extraction example 0.1'
     set_results_directory()
+    configure_logging()
 
     # 1797 samples in digits
     digits = datasets.load_digits(n_class=10)
@@ -42,8 +41,13 @@ def main():
     calculate(x, y)
 
 
+def configure_logging():
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
+    logging.info('logger initlised')
+
+
 def calculate(x, y):
-    print 'calculate'
+    logging.info('calculate')
 
     dimenstions = x.shape[1]
 
@@ -51,15 +55,16 @@ def calculate(x, y):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=200, random_state=int(time.time()))
 
     # calculate for different train data size
-    # for train_data_size in range(300, 1501, 300):
-    for train_data_size in range(300, 601, 300):
-        print 'calculate for data amount:', train_data_size  
+    for train_data_size in Configuration.SAMPLES_N:
+        logging.info('calculate for data amount:', train_data_size)
+
         # we don't need tmp1 and tmp2 because test set was extracted before
         x_train, tmp1, y_train, tmp2 = train_test_split(x, y, train_size=train_data_size, random_state=int(time.time()))
 
         assert(x_train.shape[0] == train_data_size)
     
-        config = determine_parameters_all(x_train, y_train)
+        # config = determine_parameters_all(x_train, y_train)
+        config = MethodsConfiguration()
 
         suffix = str(train_data_size)
 
@@ -69,13 +74,15 @@ def calculate(x, y):
 
         test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, dimenstions, config)
 
+
 def prepare_dataset(x, y):
     # get 1700 out of 1797 samples
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1700, random_state=int(time.time()))
     return x_train, y_train
 
+
 def determine_parameters_all(x_train, y_train):
-    print "determine parameters"
+    logging.info("determine parameters")
     config = MethodsConfiguration()
 
     config.svm.C = determine_parameters(SVM_Optimizer(x_train, y_train))
@@ -110,7 +117,7 @@ def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_obj
 
     x_train, x_test = reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object)
 
-    print 'Method:' + str(type(reduction_object).__name__),'Components:' + str(reduction_object.n_components), file_prefix, '\n'
+    logging.info('Method:' + str(type(reduction_object).__name__),'Components:' + str(reduction_object.n_components), file_prefix, '\n')
 
     svm_scores = list()
     ann_scores = list()
@@ -170,7 +177,7 @@ def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
 
 
 def determine_parameters(optimizer):
-    print 'determine parameters', optimizer.__class__.__name__
+    logging.info('determine parameters', optimizer.__class__.__name__)
     return optimizer.optimize()
 
 

@@ -2,3 +2,4 @@
 *.dat
 results*
 results*/*.dat
+.idea
