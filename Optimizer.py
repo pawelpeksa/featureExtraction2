@@ -172,7 +172,7 @@ ALPHA_KEY = 'alpha'
 HIDDEN_NEURONS_KEY = 'hidden_neurons'
 
 class ANN_Optimizer(Optimizer):
-    def __init__(self, x_train, y_train, x_test, y_test, n_folds=10,
+    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
                  hid_neurons_begin=1, hid_neurons_end=15,
                  alpha_begin=0.0001, alpha_end=5):
 
@@ -244,6 +244,8 @@ def determine_parameters_all(x_train, y_train, x_test, y_test):
     config.ann = ann_opt.ann
     config.decision_tree = tree_opt.decision_tree
     config.random_forest = forest_opt.random_forest
+
+    logging.info(config.toDict())
 
     return config
 
