@@ -83,7 +83,7 @@ def save_methods_config(config, file_name):
 
 def test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, config):
 
-    for i in Configuration.DIMS:
+    for i in reversed(Configuration.DIMS):
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 

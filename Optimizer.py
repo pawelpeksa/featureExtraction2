@@ -17,7 +17,7 @@ from MethodsConfiguration import *
 
 
 class Optimizer():
-    def __init__(self, x_train, y_train, x_test, y_test, n_folds=10):
+    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1):
         self._x_train = x_train
         self._y_train = y_train
 
@@ -63,7 +63,7 @@ DEPTH_KEY = 'depth'
 ESTIMATORS_KEY = 'estimators'
 
 class RandomForest_Optimizer(Optimizer):
-    def __init__(self, x_train, y_train, x_test, y_test, n_folds=10,
+    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
                  depth_begin=1, depth_end=15,
                  estimators_begin=5, estimators_end=50):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
@@ -102,7 +102,7 @@ class RandomForest_Optimizer(Optimizer):
 C_KEY = 'C'
 
 class SVM_Optimizer(Optimizer):
-    def __init__(self, x_train, y_train, x_test, y_test, n_folds=10, C_begin=2**-5, C_end=2):
+    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1, C_begin=2**-5, C_end=2):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._C_begin = C_begin
@@ -136,7 +136,7 @@ class SVM_Optimizer(Optimizer):
 DEPTH_KEY = 'depth'
 
 class DecisionTree_Optimizer(Optimizer):
-    def __init__(self, x_train, y_train, x_test, y_test, n_folds=10,
+    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
                  depth_begin=1, depth_end=15):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
@@ -243,9 +243,7 @@ def determine_parameters_all(x_train, y_train, x_test, y_test):
     config.svm = svm_opt.svm
     config.ann = ann_opt.ann
     config.decision_tree = tree_opt.decision_tree
-     
-    config.random_forest.max_depth = forest_opt.random_forest.max_depth
-    config.random_forest.n_estimators = forest_opt.random_forest.n_estimators
+    config.random_forest = forest_opt.random_forest
 
     return config
 
