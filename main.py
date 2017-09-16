@@ -4,10 +4,8 @@ import json
 import logging
 import os
 
-from SVM_Optimizer import SVM_Optimizer
-from ANN_Optimizer import ANN_Optimizer
-from DecisionTree_Optimizer import DecisionTree_Optimizer
-from RandomForest_Optimizer import RandomForest_Optimizer
+from Utils import Utils
+from Optimizer import determine_parameters_all
 
 from MethodsConfiguration import MethodsConfiguration
 from Configuration import Configuration
@@ -49,21 +47,19 @@ def configure_logging():
 def calculate(x, y):
     logging.info('calculate')
 
-    dimensions = x.shape[1]
-
-    # hold out for test 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=200, random_state=int(time.time()))
+    x_all, x_val, y_all, y_val = train_test_split(x, y, test_size=100, random_state=Utils.get_seed())
 
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
-        logging.info('calculate for data amount:', train_data_size)
+        logging.info('calculate for data amount:{}'.format(train_data_size))
 
-        # we don't need tmp1 and tmp2 because test set was extracted before
-        x_train, tmp1, y_train, tmp2 = train_test_split(x, y, train_size=train_data_size, random_state=int(time.time()))
+        # get n_samples from dataset
+        tmp, x, tmp, y = train_test_split(x_all, y_all, test_size=train_data_size, random_state=Utils.get_seed())
 
-        assert(x_train.shape[0] == train_data_size)
-    
-        config = determine_parameters_all(x_train, y_train)
+        # divide for training and testing
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=Utils.get_seed())
+
+        config = determine_parameters_all(x_train, y_train, x_test, y_test)
 
         suffix = str(train_data_size)
 
@@ -71,7 +67,7 @@ def calculate(x, y):
 
         result_file_prefix = 'digits_' + suffix
 
-        test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, dimensions, config)
+        test_data_set(x_train, y_train, x_val, y_val, result_file_prefix, config)
 
 
 def prepare_dataset(x, y):
@@ -80,45 +76,35 @@ def prepare_dataset(x, y):
     return x_train, y_train
 
 
-def determine_parameters_all(x_train, y_train):
-    logging.info("determine parameters")
-    config = MethodsConfiguration()
-
-    config.svm.C = determine_parameters(SVM_Optimizer(x_train, y_train))
-    config.ann.hidden_neurons, config.ann.solver, config.ann.alpha = determine_parameters(ANN_Optimizer(x_train,y_train))
-    config.decision_tree.max_depth = determine_parameters(DecisionTree_Optimizer(x_train,y_train))
-    config.random_forest.max_depth, config.random_forest.n_estimators = determine_parameters(RandomForest_Optimizer(x_train,y_train))
-
-    return config
-
-
 def save_methods_config(config, file_name):
     with open(file_name, 'w') as output:
         json.dump(config.toDict(), output)    
 
 
-def test_data_set(x_train, y_train, x_test, y_test, file_prefix, max_dimension, config):
+def test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, config):
 
     for i in Configuration.DIMS:
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        test_given_extraction_method(x_train, y_train, x_test, y_test, pca, file_prefix, max_dimension, config)
-        test_given_extraction_method(x_train, y_train, x_test, y_test, lda, file_prefix, max_dimension, config)
+        test_given_extraction_method(x_train, y_train, x_test, y_test, pca, result_file_prefix, config)
+        test_given_extraction_method(x_train, y_train, x_test, y_test, lda, result_file_prefix, config)
 
 
 def reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object):
-    x_train = reduction_object.fit(x_train, y_train).transform(x_train)
-    x_test = reduction_object.fit(x_test, y_test).transform(x_test)
+
+    if reduction_object.n_components < 64:
+        x_train = reduction_object.fit(x_train, y_train).transform(x_train)
+        x_test = reduction_object.fit(x_test, y_test).transform(x_test)
 
     return x_train, x_test
 
 
-def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_object, file_prefix, max_dimension, config):
+def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_object, file_prefix, config):
 
     x_train, x_test = reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object)
 
-    logging.info('Method:' + str(type(reduction_object).__name__),'Components:' + str(reduction_object.n_components), file_prefix, '\n')
+    logging.info('Method:{0} Components_n:{1} result_file_prefix:{1}'.format(type(reduction_object).__name__, reduction_object.n_components, file_prefix))
 
     svm_scores = list()
     ann_scores = list()
@@ -149,7 +135,7 @@ def save_results(file_prefix, method_name, reduction_object, scores):
 
 
 def fit_and_score_svm(x_train, y_train, x_test, y_test, config):
-    SVM = svm.SVC(kernel='linear', C=1)
+    SVM = svm.SVC(kernel='linear', C=config.svm.C)
     SVM.fit(x_train, y_train)
     return SVM.score(x_test, y_test)
 
@@ -178,7 +164,7 @@ def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
 
 
 def determine_parameters(optimizer):
-    logging.info('determine parameters', optimizer.__class__.__name__)
+    logging.info('determine parameters {0}'.format(optimizer.__class__.__name__))
     return optimizer.optimize()
 
 
