@@ -49,7 +49,7 @@ def configure_logging():
 def calculate(x, y):
     logging.info('calculate')
 
-    dimenstions = x.shape[1]
+    dimensions = x.shape[1]
 
     # hold out for test 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=200, random_state=int(time.time()))
@@ -63,8 +63,7 @@ def calculate(x, y):
 
         assert(x_train.shape[0] == train_data_size)
     
-        # config = determine_parameters_all(x_train, y_train)
-        config = MethodsConfiguration()
+        config = determine_parameters_all(x_train, y_train)
 
         suffix = str(train_data_size)
 
@@ -72,7 +71,7 @@ def calculate(x, y):
 
         result_file_prefix = 'digits_' + suffix
 
-        test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, dimenstions, config)
+        test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, dimensions, config)
 
 
 def prepare_dataset(x, y):
@@ -92,6 +91,7 @@ def determine_parameters_all(x_train, y_train):
 
     return config
 
+
 def save_methods_config(config, file_name):
     with open(file_name, 'w') as output:
         json.dump(config.toDict(), output)    
@@ -99,7 +99,7 @@ def save_methods_config(config, file_name):
 
 def test_data_set(x_train, y_train, x_test, y_test, file_prefix, max_dimension, config):
 
-    for i in range(1, max_dimension + 1):
+    for i in Configuration.DIMS:
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
@@ -112,6 +112,7 @@ def reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object):
     x_test = reduction_object.fit(x_test, y_test).transform(x_test)
 
     return x_train, x_test
+
 
 def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_object, file_prefix, max_dimension, config):
 
