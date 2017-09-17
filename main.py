@@ -19,6 +19,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.decomposition import PCA
 
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.datasets import make_classification
 
 result_folder = "./results"
 
@@ -28,13 +29,7 @@ def main():
     set_results_directory()
     configure_logging()
 
-    # 1797 samples in digits
-    digits = datasets.load_digits(n_class=10)
-
-    x = digits.data
-    y = digits.target
-
-    x, y = prepare_dataset(x, y)
+    x, y = prepare_dataset()
 
     calculate(x, y)
 
@@ -70,10 +65,8 @@ def calculate(x, y):
         test_data_set(x_train, y_train, x_val, y_val, result_file_prefix, config)
 
 
-def prepare_dataset(x, y):
-    # get 1700 out of 1797 samples
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1700, random_state=int(time.time()))
-    return x_train, y_train
+def prepare_dataset():
+    return make_classification(n_samples=10000, n_features=64, n_classes=5, n_informative=15)
 
 
 def save_methods_config(config, file_name):
