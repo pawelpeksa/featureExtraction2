@@ -64,8 +64,8 @@ ESTIMATORS_KEY = 'estimators'
 
 class RandomForest_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
-                 depth_begin=1, depth_end=15,
-                 estimators_begin=5, estimators_end=50):
+                 depth_begin=1, depth_end=5,
+                 estimators_begin=5, estimators_end=10):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._depth_begin = depth_begin
@@ -79,7 +79,7 @@ class RandomForest_Optimizer(Optimizer):
 
     def _init_hyper_space(self):
         self._hyper_space = [hp.choice(DEPTH_KEY, np.arange(self._depth_begin, self._depth_end + 1)),
-                             hp.choice(ESTIMATORS_KEY, np.arange(self._estimators_begin, self._estimators_end + 1, 10))]
+                             hp.choice(ESTIMATORS_KEY, np.arange(self._estimators_begin, self._estimators_end + 1, 2))]
 
     def _objective(self, args):
         Optimizer._log_progress(self, 'random forest')
@@ -137,7 +137,7 @@ DEPTH_KEY = 'depth'
 
 class DecisionTree_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
-                 depth_begin=1, depth_end=15):
+                 depth_begin=1, depth_end=5):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._depth_begin = depth_begin
@@ -173,7 +173,7 @@ HIDDEN_NEURONS_KEY = 'hidden_neurons'
 
 class ANN_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
-                 hid_neurons_begin=1, hid_neurons_end=15,
+                 hid_neurons_begin=1, hid_neurons_end=10,
                  alpha_begin=0.0001, alpha_end=5):
 
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
@@ -191,7 +191,7 @@ class ANN_Optimizer(Optimizer):
 
     def _init_hyper_space(self):
         self._hyper_space = [
-            hp.choice(HIDDEN_NEURONS_KEY, np.arange(self._hid_neurons_begin, self._hid_neurons_end + 1, 2)),
+            hp.choice(HIDDEN_NEURONS_KEY, np.arange(self._hid_neurons_begin, self._hid_neurons_end + 1, 1)),
             hp.choice(SOLVER_KEY, self._solvers),
             hp.uniform(ALPHA_KEY, self._alpha_begin, self._alpha_end)]
 

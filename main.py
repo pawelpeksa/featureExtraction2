@@ -66,7 +66,7 @@ def calculate(x, y):
 
 
 def prepare_dataset():
-    return make_classification(n_samples=10000, n_features=64, n_classes=5, n_informative=15)
+    return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10 , n_informative=5, n_redundant=Configuration.MAX_FEATURES-5)
 
 
 def save_methods_config(config, file_name):
@@ -86,7 +86,7 @@ def test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, config):
 
 def reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object):
 
-    if reduction_object.n_components < 64:
+    if reduction_object.n_components < Configuration.MAX_FEATURES:
         x_train = reduction_object.fit(x_train, y_train).transform(x_train)
         x_test = reduction_object.fit(x_test, y_test).transform(x_test)
 
