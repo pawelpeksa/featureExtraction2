@@ -67,7 +67,7 @@ def calculate(x, y):
 
         result_file_prefix = 'digits_' + suffix
 
-        test_data_set(x_train, y_train, x_val, y_val, result_file_prefix, config)
+        test_data_set(x, y, result_file_prefix, config)
 
 
 def prepare_dataset(x, y):
@@ -81,28 +81,29 @@ def save_methods_config(config, file_name):
         json.dump(config.toDict(), output)    
 
 
-def test_data_set(x_train, y_train, x_test, y_test, result_file_prefix, config):
+def test_data_set(x, y, result_file_prefix, config):
 
     for i in reversed(Configuration.DIMS):
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        test_given_extraction_method(x_train, y_train, x_test, y_test, pca, result_file_prefix, config)
-        test_given_extraction_method(x_train, y_train, x_test, y_test, lda, result_file_prefix, config)
+        test_given_extraction_method(x, y, pca, result_file_prefix, config)
+        test_given_extraction_method(x, y, lda, result_file_prefix, config)
 
 
-def reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object):
+def reduce_dimensions(x, y, reduction_object):
 
     if reduction_object.n_components < 64:
-        x_train = reduction_object.fit(x_train, y_train).transform(x_train)
-        x_test = reduction_object.fit(x_test, y_test).transform(x_test)
+        x = reduction_object.fit(x, y).transform(x)
 
-    return x_train, x_test
+    return x, y
 
 
-def test_given_extraction_method(x_train, y_train, x_test, y_test, reduction_object, file_prefix, config):
+def test_given_extraction_method(x, y, reduction_object, file_prefix, config):
 
-    x_train, x_test = reduce_dimensions(x_train, y_train, x_test, y_test, reduction_object)
+    x, y = reduce_dimensions(x, y, reduction_object)
+    
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=Utils.get_seed())
 
     logging.info('Method:{0} Components_n:{1} result_file_prefix:{1}'.format(type(reduction_object).__name__, reduction_object.n_components, file_prefix))
 
