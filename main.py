@@ -42,10 +42,8 @@ def configure_logging():
     logging.info('logger initlised')
 
 
-def calculate(x, y):
+def calculate(x_all, y_all):
     logging.info('calculate')
-
-    x_all, x_val, y_all, y_val = train_test_split(x, y, test_size=100, random_state=Utils.get_seed())
 
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
@@ -54,19 +52,7 @@ def calculate(x, y):
         # get n_samples from dataset
         tmp, x, tmp, y = train_test_split(x_all, y_all, test_size=train_data_size, random_state=Utils.get_seed())
 
-        # divide for training and testing
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=Utils.get_seed())
-
-        config = determine_parameters_all(x_train, y_train, x_test, y_test)
-
-        suffix = str(train_data_size)
-
-        save_methods_config(config, result_folder + 'configs/methods_config_' + suffix + '.dat')
-
-        result_file_prefix = 'digits_' + suffix
-
-        test_data_set(x, y, result_file_prefix, config)
-
+        test_data_set(x, y)
 
 def prepare_dataset():
     return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10 , n_informative=5, n_redundant=Configuration.MAX_FEATURES-5)
@@ -77,14 +63,14 @@ def save_methods_config(config, file_name):
         json.dump(config.toDict(), output)    
 
 
-def test_data_set(x, y, result_file_prefix, config):
+def test_data_set(x, y):
 
     for i in reversed(Configuration.DIMS):
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        test_given_extraction_method(x, y, pca, result_file_prefix, config)
-        test_given_extraction_method(x, y, lda, result_file_prefix, config)
+        test_given_extraction_method(x, y, pca)
+        test_given_extraction_method(x, y, lda)
 
 
 def reduce_dimensions(x, y, reduction_object):
@@ -94,11 +80,17 @@ def reduce_dimensions(x, y, reduction_object):
     return x, y
 
 
-def test_given_extraction_method(x, y, reduction_object, file_prefix, config):
-
+def test_given_extraction_method(x, y, reduction_object):
     x, y = reduce_dimensions(x, y, reduction_object)
-    
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=Utils.get_seed())
+
+    x_train, x_test_val, y_train, y_test_val = train_test_split(x, y, test_size=0.4, random_state=Utils.get_seed())
+    x_val, x_test, y_val, y_test = train_test_split(x_test_val, y_test_val, test_size=0.5, random_state=Utils.get_seed())
+
+    suffix = str(len(x))
+    file_prefix = 'digits_' + suffix
+
+    config = determine_parameters_all(x_train, y_train, x_test, y_test)
+    save_methods_config(config, result_folder + 'configs/methods_config_' + file_prefix + '.dat')
 
     logging.info('Method:{0} Components_n:{1} result_file_prefix:{1}'.format(type(reduction_object).__name__, reduction_object.n_components, file_prefix))
 
@@ -109,10 +101,10 @@ def test_given_extraction_method(x, y, reduction_object, file_prefix, config):
 
     # do it 5 times for statistics
     for i in range(1,6):
-        svm_score = fit_and_score_svm(x_train, y_train, x_test, y_test, config)
-        ann_score = fit_and_score_ann(x_train, y_train, x_test, y_test, config)
-        decision_tree_score = fit_and_score_decision_tree(x_train, y_train, x_test, y_test, config)
-        random_forest_score = fit_and_score_random_forest(x_train, y_train, x_test, y_test, config)
+        svm_score = fit_and_score_svm(x_train, y_train, x_val, y_val, config)
+        ann_score = fit_and_score_ann(x_train, y_train, x_val, y_val, config)
+        decision_tree_score = fit_and_score_decision_tree(x_train, y_train, x_val, y_val, config)
+        random_forest_score = fit_and_score_random_forest(x_train, y_train, x_val, y_val, config)
 
         svm_scores.append(svm_score)
         ann_scores.append(ann_score)
