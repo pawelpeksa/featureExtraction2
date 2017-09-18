@@ -21,12 +21,15 @@ from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.datasets import make_classification
 
-result_folder = "./results"
+result_folder = './results/'
 
 
 def main():
     print 'feature extraction example 0.1'
-    set_results_directory()
+    global result_folder
+
+    result_folder = create_next_directory(result_folder)
+
     configure_logging()
 
     x, y = prepare_dataset()
@@ -58,7 +61,7 @@ def calculate(x, y):
 
         suffix = str(train_data_size)
 
-        save_methods_config(config, 'methods_config_' + suffix + '.dat')
+        save_methods_config(config, result_folder + 'configs/methods_config_' + suffix + '.dat')
 
         result_file_prefix = 'digits_' + suffix
 
@@ -123,7 +126,7 @@ def test_given_extraction_method(x, y, reduction_object, file_prefix, config):
 
 
 def save_results(file_prefix, method_name, reduction_object, scores):
-    with open(result_folder + '/' + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat', 'a') as output:
+    with open(result_folder + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat', 'a') as output:
         output.write(str(reduction_object.n_components) + "\t" + str(np.mean(scores)) + '\t' + str(np.std(scores)) + '\n')   
 
 
@@ -161,16 +164,18 @@ def determine_parameters(optimizer):
     return optimizer.optimize()
 
 
-def set_results_directory():
-    global result_folder
+def create_next_directory(directory):
 
     for i in range(0,10000):
 
-        new_name = result_folder + str(i)
+        new_name = directory[:-1] + str(i) + '/'
         if not os.path.exists(new_name):
             os.makedirs(new_name)
-            result_folder = new_name
-            return
-         
-main()
+            os.makedirs(new_name + 'plots')
+            os.makedirs(new_name + 'configs')
+            return new_name
+
+
+if __name__ == '__main__':
+    main()
 
