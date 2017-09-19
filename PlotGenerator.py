@@ -98,7 +98,7 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color='b')
 
     red_met_str = ''
 
-    if (reduction_method == 'PCA'):
+    if reduction_method == 'PCA':
         red_met_str = 'PCA'
     else:
         red_met_str = 'LDA'
@@ -117,9 +117,12 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color='b')
         int(feature_nums[bestIndex])) + '$ & $ ' + str(x_num) + ' $ & ' + red_met_str + ' & ' + ml_method + ' \\\\'
     print "\hline"
     print rowcolor
-    print '$' + str(round_to_2_decimal(scores[len(scores) - 1])) + ' \pm ' + str(
-        round_to_2_decimal(stds[len(scores) - 1])) + '$ & $' + str(int(64)) + '$ & $ ' + str(
-        x_num) + ' $ & ' + '-' + ' & ' + ml_method + ' \\\\'
+
+    score_max_features = str(round_to_2_decimal(scores[Configuration.MAX_FEATURES - 1]))
+    std_max_features = str(round_to_2_decimal(stds[Configuration.MAX_FEATURES - 1]))
+    s_max_features = str(int(Configuration.MAX_FEATURES))
+
+    print '$' + score_max_features + ' \pm ' + str(std_max_features) + '$ & $' + s_max_features + '$ & $ ' + str(x_num) + ' $ & ' + '-' + ' & ' + ml_method + ' \\\\'
 
     betterPerformance = bestScore - scores[len(scores) - 1]
 
@@ -176,16 +179,7 @@ def prepare_data(data):
     b1 = feature_nums[0]
     b2 = scores[0]
     b3 = stds[0]
-    # return feature_nums[::-1], scores[::-1], stds[::-1]
-    l1 = (feature_nums[::-4])
-    l2 = (scores[::-4])
-    l3 = (stds[::-4])
-
-    l1.append(b1)
-    l2.append(b2)
-    l3.append(b3)
-
-    return l1, l2, l3
+    return feature_nums[::-1], scores[::-1], stds[::-1]
 
 
 def floats_from_str(str):
