@@ -54,12 +54,14 @@ def calculate(x_all, y_all):
 
         test_data_set(x, y)
 
+
 def prepare_dataset():
-    #return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10 , n_informative=5, n_redundant=Configuration.MAX_FEATURES-5)
-    digits = datasets.load_digits(n_class=10)
-    x = digits.data
-    y = digits.target
-    return x, y
+    return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10, n_informative=5, n_redundant=Configuration.MAX_FEATURES - 5)
+    # digits = datasets.load_digits(n_class=10)
+    # x = digits.data
+    # y = digits.target
+    # return x, y
+
 
 def save_methods_config(config, file_name):
     with open(file_name, 'w') as output:
