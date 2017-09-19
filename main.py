@@ -86,26 +86,36 @@ def reduce_dimensions(x, y, reduction_object):
 
 
 def test_given_extraction_method(x, y, reduction_object):
-    x, y = reduce_dimensions(x, y, reduction_object)
-
-    x_train, x_test_val, y_train, y_test_val = train_test_split(x, y, test_size=0.4, random_state=Utils.get_seed())
-    x_val, x_test, y_val, y_test = train_test_split(x_test_val, y_test_val, test_size=0.5, random_state=Utils.get_seed())
-
-    suffix = str(len(x))
-    file_prefix = 'digits_' + suffix
-
-    config = determine_parameters_all(x_train, y_train, x_test, y_test)
-    save_methods_config(config, result_folder + 'configs/methods_config_' + file_prefix + '.dat')
-
-    logging.info('Method:{0} Components_n:{1} result_file_prefix:{1}'.format(type(reduction_object).__name__, reduction_object.n_components, file_prefix))
-
     svm_scores = list()
     ann_scores = list()
     decision_tree_scores = list()
     random_forest_scores = list()
 
-    # do it 5 times for statistics
-    for i in range(1,6):
+    x, y = reduce_dimensions(x, y, reduction_object)
+
+    x_train, x_test_val, y_train, y_test_val = train_test_split(x, y, test_size=0.4, random_state=Utils.get_seed())
+    x_val, x_test, y_val, y_test = train_test_split(x_test_val, y_test_val, test_size=0.5,
+                                                    random_state=Utils.get_seed())
+
+    suffix = str(len(x))
+    file_prefix = 'digits_' + suffix
+
+    config = determine_parameters_all(x_train, y_train, x_test, y_test)
+
+    for i in range(1,11):
+        x, y = reduce_dimensions(x, y, reduction_object)
+
+        x_train, x_test_val, y_train, y_test_val = train_test_split(x, y, test_size=0.4, random_state=Utils.get_seed())
+        x_val, x_test, y_val, y_test = train_test_split(x_test_val, y_test_val, test_size=0.5,
+                                                        random_state=Utils.get_seed())
+
+        suffix = str(len(x))
+        file_prefix = 'digits_' + suffix
+
+        logging.info('Method:{0} Components_n:{1} result_file_prefix:{1}'.format(type(reduction_object).__name__,
+                                                                                 reduction_object.n_components,
+                                                                                 file_prefix))
+
         svm_score = fit_and_score_svm(x_train, y_train, x_val, y_val, config)
         ann_score = fit_and_score_ann(x_train, y_train, x_val, y_val, config)
         decision_tree_score = fit_and_score_decision_tree(x_train, y_train, x_val, y_val, config)
