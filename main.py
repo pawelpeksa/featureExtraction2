@@ -17,6 +17,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.decomposition import PCA
+from sklearn import datasets
 
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.datasets import make_classification
@@ -48,19 +49,27 @@ def calculate(x_all, y_all):
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
         logging.info('calculate for data amount:{}'.format(train_data_size))
-
-        # get n_samples from dataset
-        tmp, x, tmp, y = train_test_split(x_all, y_all, test_size=train_data_size, random_state=Utils.get_seed())
+	
+        if train_data_size < x_all.shape[0]:
+            # get n_samples from dataset
+            tmp, x, tmp, y = train_test_split(x_all, y_all, test_size=train_data_size, random_state=Utils.get_seed())
+        else:
+            x, y = x_all, y_all
 
         test_data_set(x, y)
 
 
 def prepare_dataset():
-    return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10, n_informative=5, n_redundant=Configuration.MAX_FEATURES - 5)
+    # return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10, n_informative=5, n_redundant=Configuration.MAX_FEATURES - 5)
     # digits = datasets.load_digits(n_class=10)
     # x = digits.data
     # y = digits.target
     # return x, y
+    iris = datasets.load_iris()
+    x = iris.data
+    y = iris.target
+    return x, y
+
 
 
 def save_methods_config(config, file_name):
@@ -104,10 +113,6 @@ def test_given_extraction_method(x, y, reduction_object):
 
     for i in range(1,11):
         x, y = reduce_dimensions(x, y, reduction_object)
-
-        x_train, x_test_val, y_train, y_test_val = train_test_split(x, y, test_size=0.4, random_state=Utils.get_seed())
-        x_val, x_test, y_val, y_test = train_test_split(x_test_val, y_test_val, test_size=0.5,
-                                                        random_state=Utils.get_seed())
 
         suffix = str(len(x))
         file_prefix = 'digits_' + suffix
