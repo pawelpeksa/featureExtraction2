@@ -88,9 +88,18 @@ def test_data_set(x, y):
 
 
 def reduce_dimensions(x, y, reduction_object):
+    logging.info("Doing reduction to {0} dimension(s). Input shape:{1}".format(reduction_object.n_components, x.shape))
     if reduction_object.n_components < Configuration.MAX_FEATURES:
-        x = reduction_object.fit(x, y).transform(x)
+        if reduction_object.__class__.__name__ == "PCA":
+            logging.info("Reduction done using:{0}".format(reduction_object.__class__.__name__))
+            x = reduction_object.fit(x).transform(x)
+        else:
+            logging.info("Reduction done using:{0}".format(reduction_object.__class__.__name__))
+            x = reduction_object.fit(x, y).transform(x)
+    else:
+        logging.info("Skipping reduction. Coponents to reduce:{0} equal to max dataset dimensionality:{1}".format(reduction_object.n_components, Configuration.MAX_FEATURES))
 
+    logging.info("After reduction shape:{0}".format(x.shape))
     return x, y
 
 
@@ -112,8 +121,6 @@ def test_given_extraction_method(x, y, reduction_object):
     config = determine_parameters_all(x_train, y_train, x_test, y_test)
 
     for i in range(1,11):
-        x, y = reduce_dimensions(x, y, reduction_object)
-
         suffix = str(len(x))
         file_prefix = 'digits_' + suffix
 
