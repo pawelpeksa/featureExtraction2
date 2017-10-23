@@ -46,6 +46,8 @@ def configure_logging():
 def calculate(x_all, y_all):
     logging.info('calculate')
 
+    x_all, x_val, y_all, y_val = train_test_split(x_all, y_all, test_size=200, random_state=Utils.get_seed())
+
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
         logging.info('calculate for data amount:{}'.format(train_data_size))
@@ -56,20 +58,19 @@ def calculate(x_all, y_all):
         else:
             x, y = x_all, y_all
 
-        test_data_set(x, y)
+        test_data_set(x, y, x_val, y_val)
 
 
 def prepare_dataset():
     # return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10, n_informative=5, n_redundant=Configuration.MAX_FEATURES - 5)
-    # digits = datasets.load_digits(n_class=10)
-    # x = digits.data
-    # y = digits.target
-    # return x, y
-    iris = datasets.load_iris()
-    x = iris.data
-    y = iris.target
+    digits = datasets.load_digits(n_class=10)
+    x = digits.data
+    y = digits.target
     return x, y
-
+    # iris = datasets.load_iris()
+    # x = iris.data
+    # y = iris.target
+    # return x, y
 
 
 def save_methods_config(config, file_name):
@@ -77,43 +78,45 @@ def save_methods_config(config, file_name):
         json.dump(config.toDict(), output)    
 
 
-def test_data_set(x, y):
+def test_data_set(x, y, x_val, y_val):
 
     for i in reversed(Configuration.DIMS):
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        test_given_extraction_method(x, y, pca)
-        test_given_extraction_method(x, y, lda)
+        test_given_extraction_method(x, y, x_val, y_val, pca)
+        test_given_extraction_method(x, y, x_val, y_val, lda)
 
 
-def reduce_dimensions(x, y, reduction_object):
+def reduce_dimensions(x, y, x_val, y_val, reduction_object):
     logging.info("Doing reduction to {0} dimension(s). Input shape:{1}".format(reduction_object.n_components, x.shape))
     if reduction_object.n_components < Configuration.MAX_FEATURES:
         if reduction_object.__class__.__name__ == "PCA":
             logging.info("Reduction done using:{0}".format(reduction_object.__class__.__name__))
-            x = reduction_object.fit(x).transform(x)
+            reduction_object = reduction_object.fit(x)
+            x = reduction_object.transform(x)
+            x_val = reduction_object.transform(x_val)
         else:
             logging.info("Reduction done using:{0}".format(reduction_object.__class__.__name__))
-            x = reduction_object.fit(x, y).transform(x)
+            reduction_object = reduction_object.fit(x, y)
+            x = reduction_object.transform(x)
+            x_val = reduction_object.transform(x_val)
     else:
         logging.info("Skipping reduction. Coponents to reduce:{0} equal to max dataset dimensionality:{1}".format(reduction_object.n_components, Configuration.MAX_FEATURES))
 
     logging.info("After reduction shape:{0}".format(x.shape))
-    return x, y
+    return x, y, x_val, y_val
 
 
-def test_given_extraction_method(x, y, reduction_object):
+def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
     svm_scores = list()
     ann_scores = list()
     decision_tree_scores = list()
     random_forest_scores = list()
 
-    x, y = reduce_dimensions(x, y, reduction_object)
+    x, y, x_val, y_val = reduce_dimensions(x, y, x_val, y_val, reduction_object)
 
-    x_train, x_test_val, y_train, y_test_val = train_test_split(x, y, test_size=0.4, random_state=Utils.get_seed())
-    x_val, x_test, y_val, y_test = train_test_split(x_test_val, y_test_val, test_size=0.5,
-                                                    random_state=Utils.get_seed())
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=Utils.get_seed())
 
     suffix = str(len(x))
     file_prefix = 'digits_' + suffix

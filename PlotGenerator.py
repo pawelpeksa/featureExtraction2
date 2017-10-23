@@ -118,6 +118,7 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color='b')
     print "\hline"
     print rowcolor
 
+    '''
     score_max_features = str(round_to_2_decimal(scores[Configuration.MAX_FEATURES - 1]))
     std_max_features = str(round_to_2_decimal(stds[Configuration.MAX_FEATURES - 1]))
     s_max_features = str(int(Configuration.MAX_FEATURES))
@@ -139,6 +140,7 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color='b')
         pca600.append(betterPerformance)
     if red_met_str == 'LDA' and str(x_num) == str(600):
         lda600.append(betterPerformance)
+    '''
 
     # print "Best for method: {0} is {1} for {2} features".format(ml_method, bestScore, feature_nums[bestIndex])
     # print "Score for 64 features is: {0} is {1}".format(ml_method, scores[len(scores)-1])
