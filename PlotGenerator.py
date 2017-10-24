@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import matplotlib.pyplot as plt
 import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg') # has to be imported before pyplot
+import matplotlib.pyplot as plt
 
 from Configuration import Configuration
 
