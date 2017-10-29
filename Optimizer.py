@@ -29,7 +29,7 @@ class Optimizer():
         self._iteration = 0
 
     def optimize(self):
-        logging.info('Start optimization for:' + self.__class__.__name__)
+        logging.warning('Start optimization for:' + self.__class__.__name__)
         evals = Configuration.HYPEROPT_EVALS_PER_SEARCH
         result = fmin(fn=self._objective, space=self._hyper_space, algo=tpe.suggest, max_evals=evals)
         return space_eval(self._hyper_space, result)
@@ -53,7 +53,7 @@ class Optimizer():
 
     def _log_progress(self, classifier_str):
         msg = classifier_str + ' optimizer progress:' + str((self._iteration / float(Configuration.HYPEROPT_EVALS_PER_SEARCH)) * 100) + '%'
-        logging.info(msg)
+        # logging.warning(msg)
 
     def _init_hyper_space(self):
         raise NotImplementedError('Should have implemented this')
@@ -219,7 +219,7 @@ class ANN_Optimizer(Optimizer):
 
 
 def determine_parameters_all(x_train, y_train, x_test, y_test):
-    logging.info('determine parameters')
+    logging.warning('determine parameters')
     config = MethodsConfiguration()
 
     threads = list()
@@ -245,11 +245,11 @@ def determine_parameters_all(x_train, y_train, x_test, y_test):
     config.decision_tree = tree_opt.decision_tree
     config.random_forest = forest_opt.random_forest
 
-    logging.info(config.toDict())
+    logging.warning(config.toDict())
 
     return config
 
 
 def determine_parameters(optimizer):
-    logging.info('determine parameters:{0}'.format(optimizer.__class__.__name__))
+    logging.warning('determine parameters:{0}'.format(optimizer.__class__.__name__))
     optimizer.optimize()

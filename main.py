@@ -39,18 +39,18 @@ def main():
 
 
 def configure_logging():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
-    logging.info('logger initlised')
+    logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(levelname)s:%(message)s')
+    logging.warning('logger initlised')
 
 
 def calculate(x_all, y_all):
-    logging.info('calculate')
+    logging.warning('calculate')
 
     x_all, x_val, y_all, y_val = train_test_split(x_all, y_all, test_size=200, random_state=Utils.get_seed())
 
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
-        logging.info('calculate for data amount:{}'.format(train_data_size))
+        logging.warning('calculate for data amount:{}'.format(train_data_size))
 	
         if train_data_size < x_all.shape[0]:
             # get n_samples from dataset
@@ -66,6 +66,8 @@ def prepare_dataset():
     digits = datasets.load_digits(n_class=10)
     x = digits.data
     y = digits.target
+
+    logging.warning("Returning working dataset, shape:{0}".format(x.shape))
     return x, y
     # iris = datasets.load_iris()
     # x = iris.data
@@ -81,6 +83,7 @@ def save_methods_config(config, file_name):
 def test_data_set(x, y, x_val, y_val):
 
     for i in reversed(Configuration.DIMS):
+        logging.warning("Calculating for: {0} records".format(i))
         pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
@@ -89,26 +92,28 @@ def test_data_set(x, y, x_val, y_val):
 
 
 def reduce_dimensions(x, y, x_val, y_val, reduction_object):
-    logging.info("Doing reduction to {0} dimension(s). Input shape:{1}".format(reduction_object.n_components, x.shape))
+    logging.warning("Doing reduction to {0} dimension(s). Input shape:{1}".format(reduction_object.n_components, x.shape))
     if reduction_object.n_components < Configuration.MAX_FEATURES:
         if reduction_object.__class__.__name__ == "PCA":
-            logging.info("Reduction done using:{0}".format(reduction_object.__class__.__name__))
+            logging.warning("Reduction done using:{0}".format(reduction_object.__class__.__name__))
             reduction_object = reduction_object.fit(x)
             x = reduction_object.transform(x)
             x_val = reduction_object.transform(x_val)
         else:
-            logging.info("Reduction done using:{0}".format(reduction_object.__class__.__name__))
+            logging.warning("Reduction done using:{0}".format(reduction_object.__class__.__name__))
             reduction_object = reduction_object.fit(x, y)
             x = reduction_object.transform(x)
             x_val = reduction_object.transform(x_val)
     else:
-        logging.info("Skipping reduction. Coponents to reduce:{0} equal to max dataset dimensionality:{1}".format(reduction_object.n_components, Configuration.MAX_FEATURES))
+        logging.warning("Skipping reduction. Coponents to reduce:{0} equal to max dataset dimensionality:{1}".format(reduction_object.n_components, Configuration.MAX_FEATURES))
 
-    logging.info("After reduction shape:{0}".format(x.shape))
+    logging.warning("After reduction shape:{0}".format(x.shape))
     return x, y, x_val, y_val
 
 
 def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
+    logging.warning("Testing extraction method:{0} for x shape:{1}".format(reduction_object.__class__.__name__, x.shape))
+
     svm_scores = list()
     ann_scores = list()
     decision_tree_scores = list()
@@ -127,7 +132,7 @@ def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
         suffix = str(len(x))
         file_prefix = 'digits_' + suffix
 
-        logging.info('Method:{0} Components_n:{1} result_file_prefix:{1}'.format(type(reduction_object).__name__,
+        logging.warning('I:{0} \t Method:{1} Components_n:{2} result_file_prefix:{3}'.format(i, type(reduction_object).__name__,
                                                                                  reduction_object.n_components,
                                                                                  file_prefix))
 
@@ -182,7 +187,7 @@ def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
 
 
 def determine_parameters(optimizer):
-    logging.info('determine parameters {0}'.format(optimizer.__class__.__name__))
+    logging.warning('determine parameters {0}'.format(optimizer.__class__.__name__))
     return optimizer.optimize()
 
 
