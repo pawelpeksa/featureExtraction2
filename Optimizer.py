@@ -64,8 +64,8 @@ ESTIMATORS_KEY = 'estimators'
 
 class RandomForest_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
-                 depth_begin=1, depth_end=5,
-                 estimators_begin=5, estimators_end=10):
+                 depth_begin=1, depth_end=8,
+                 estimators_begin=2, estimators_end=30):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._depth_begin = depth_begin
@@ -137,7 +137,7 @@ DEPTH_KEY = 'depth'
 
 class DecisionTree_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
-                 depth_begin=1, depth_end=5):
+                 depth_begin=1, depth_end=10):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._depth_begin = depth_begin
@@ -173,7 +173,7 @@ HIDDEN_NEURONS_KEY = 'hidden_neurons'
 
 class ANN_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
-                 hid_neurons_begin=1, hid_neurons_end=10,
+                 hid_neurons_begin=1, hid_neurons_end=30,
                  alpha_begin=0.0001, alpha_end=5):
 
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)

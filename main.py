@@ -130,11 +130,13 @@ def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
     suffix = str(len(x))
     file_prefix = 'digits_' + suffix
 
-    config = determine_parameters_all(x_train, y_train, x_test, y_test)
+
 
     for i in range(1,6):
         suffix = str(len(x))
         file_prefix = 'digits_' + suffix
+
+        config = determine_parameters_all(x_train, y_train, x_test, y_test)
 
         logging.warning('I:{0} \t Method:{1} Components_n:{2} result_file_prefix:{3}'.format(i, type(reduction_object).__name__,
                                                                                  reduction_object.n_components,
