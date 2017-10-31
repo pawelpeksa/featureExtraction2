@@ -3,6 +3,8 @@ import time
 import json
 import logging
 import os
+from random import random
+from random import randint
 
 from Utils import Utils
 from Optimizer import determine_parameters_all
@@ -46,7 +48,7 @@ def configure_logging():
 def calculate(x_all, y_all):
     logging.warning('calculate')
 
-    x_all, x_val, y_all, y_val = train_test_split(x_all, y_all, test_size=200, random_state=Utils.get_seed())
+    x_all, x_val, y_all, y_val = train_test_split(x_all, y_all, test_size=50, random_state=Utils.get_seed())
 
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
@@ -62,17 +64,19 @@ def calculate(x_all, y_all):
 
 
 def prepare_dataset():
-    # return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=10, n_informative=5, n_redundant=Configuration.MAX_FEATURES - 5)
-    digits = datasets.load_digits(n_class=10)
-    x = digits.data
-    y = digits.target
-
-    logging.warning("Returning working dataset, shape:{0}".format(x.shape))
-    return x, y
-    # iris = datasets.load_iris()
-    # x = iris.data
-    # y = iris.target
+    # return make_classification(n_samples=10000, n_features=Configuration.MAX_FEATURES, n_classes=2, n_informative=Configuration.MAX_FEATURES, n_redundant=0)
+    # digits = datasets.load_digits(n_class=10)
+    # x = digits.data
+    # y = digits.target
+    #
+    # logging.warning("Returning working dataset, shape:{0}".format(x.shape))
     # return x, y
+
+    iris = datasets.load_iris()
+    x = iris.data
+    y = iris.target
+
+    return x, y
 
 
 def save_methods_config(config, file_name):
@@ -84,10 +88,10 @@ def test_data_set(x, y, x_val, y_val):
 
     for i in reversed(Configuration.DIMS):
         logging.warning("Calculating for: {0} records".format(i))
-        pca = PCA(n_components=i)
+        #pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        test_given_extraction_method(x, y, x_val, y_val, pca)
+        #test_given_extraction_method(x, y, x_val, y_val, pca)
         test_given_extraction_method(x, y, x_val, y_val, lda)
 
 
@@ -128,7 +132,7 @@ def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
 
     config = determine_parameters_all(x_train, y_train, x_test, y_test)
 
-    for i in range(1,11):
+    for i in range(1,6):
         suffix = str(len(x))
         file_prefix = 'digits_' + suffix
 

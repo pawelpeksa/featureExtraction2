@@ -32,7 +32,7 @@ def main():
     # x_nums = ['300', '600', '900', '1200', '1500']
 
     for x_num in x_nums:
-        plot_and_save_all_ml_methods(directory, set_name, x_num, 'PCA', '.pdf')
+        #plot_and_save_all_ml_methods(directory, set_name, x_num, 'PCA', '.pdf')
         plot_and_save_all_ml_methods(directory, set_name, x_num, 'LinearDiscriminantAnalysis', '.pdf')
 
     global pca300
