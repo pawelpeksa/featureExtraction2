@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib
+
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg') # has to be imported before pyplot
+matplotlib.use('Agg')  # has to be imported before pyplot
 import matplotlib.pyplot as plt
 
 from Configuration import Configuration
@@ -32,7 +33,7 @@ def main():
     # x_nums = ['300', '600', '900', '1200', '1500']
 
     for x_num in x_nums:
-        #plot_and_save_all_ml_methods(directory, set_name, x_num, 'PCA', '.pdf')
+        # plot_and_save_all_ml_methods(directory, set_name, x_num, 'PCA', '.pdf')
         plot_and_save_all_ml_methods(directory, set_name, x_num, 'LinearDiscriminantAnalysis', '.pdf')
 
     global pca300
@@ -64,7 +65,8 @@ def plot_and_save_all_ml_methods(directory, set_name='digits', x_num='1500', red
     plt.savefig(construct_path(results_dir + 'plots/', set_name, x_num, 'all', reduction_method, '_', format))
 
 
-def construct_path(directory, set_name='digits', x_num='1500', ml_method='svm', reduction_method='PCA', sep='_', suffix='.dat'):
+def construct_path(directory, set_name='digits', x_num='1500', ml_method='svm', reduction_method='PCA', sep='_',
+                   suffix='.dat'):
     return directory + set_name + sep + str(x_num) + sep + ml_method + sep + reduction_method + suffix
 
 

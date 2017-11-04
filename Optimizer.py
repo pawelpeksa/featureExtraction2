@@ -52,7 +52,8 @@ class Optimizer():
         return -score
 
     def _log_progress(self, classifier_str):
-        msg = classifier_str + ' optimizer progress:' + str((self._iteration / float(Configuration.HYPEROPT_EVALS_PER_SEARCH)) * 100) + '%'
+        msg = classifier_str + ' optimizer progress:' + str(
+            (self._iteration / float(Configuration.HYPEROPT_EVALS_PER_SEARCH)) * 100) + '%'
         # logging.warning(msg)
 
     def _init_hyper_space(self):
@@ -61,6 +62,7 @@ class Optimizer():
 
 DEPTH_KEY = 'depth'
 ESTIMATORS_KEY = 'estimators'
+
 
 class RandomForest_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
@@ -101,8 +103,9 @@ class RandomForest_Optimizer(Optimizer):
 
 C_KEY = 'C'
 
+
 class SVM_Optimizer(Optimizer):
-    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1, C_begin=2**-5, C_end=2):
+    def __init__(self, x_train, y_train, x_test, y_test, n_folds=1, C_begin=2 ** -5, C_end=2):
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._C_begin = C_begin
@@ -111,7 +114,6 @@ class SVM_Optimizer(Optimizer):
         self.svm = SVM()
 
         self._init_hyper_space()
-
 
     def _init_hyper_space(self):
         self._hyper_space = hp.uniform(C_KEY, self._C_begin, self._C_end)
@@ -134,6 +136,7 @@ class SVM_Optimizer(Optimizer):
 
 
 DEPTH_KEY = 'depth'
+
 
 class DecisionTree_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
@@ -171,11 +174,11 @@ SOLVER_KEY = 'solver'
 ALPHA_KEY = 'alpha'
 HIDDEN_NEURONS_KEY = 'hidden_neurons'
 
+
 class ANN_Optimizer(Optimizer):
     def __init__(self, x_train, y_train, x_test, y_test, n_folds=1,
                  hid_neurons_begin=1, hid_neurons_end=30,
                  alpha_begin=0.0001, alpha_end=5):
-
         Optimizer.__init__(self, x_train, y_train, x_test, y_test, n_folds)
 
         self._hid_neurons_begin = hid_neurons_begin

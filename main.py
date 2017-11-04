@@ -53,7 +53,7 @@ def calculate(x_all, y_all):
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
         logging.warning('calculate for data amount:{}'.format(train_data_size))
-	
+
         if train_data_size < x_all.shape[0]:
             # get n_samples from dataset
             tmp, x, tmp, y = train_test_split(x_all, y_all, test_size=train_data_size, random_state=Utils.get_seed())
@@ -81,22 +81,22 @@ def prepare_dataset():
 
 def save_methods_config(config, file_name):
     with open(file_name, 'w') as output:
-        json.dump(config.toDict(), output)    
+        json.dump(config.toDict(), output)
 
 
 def test_data_set(x, y, x_val, y_val):
-
     for i in reversed(Configuration.DIMS):
         logging.warning("Calculating for: {0} records".format(i))
-        #pca = PCA(n_components=i)
+        # pca = PCA(n_components=i)
         lda = LinearDiscriminantAnalysis(n_components=i)
 
-        #test_given_extraction_method(x, y, x_val, y_val, pca)
+        # test_given_extraction_method(x, y, x_val, y_val, pca)
         test_given_extraction_method(x, y, x_val, y_val, lda)
 
 
 def reduce_dimensions(x, y, x_val, y_val, reduction_object):
-    logging.warning("Doing reduction to {0} dimension(s). Input shape:{1}".format(reduction_object.n_components, x.shape))
+    logging.warning(
+        "Doing reduction to {0} dimension(s). Input shape:{1}".format(reduction_object.n_components, x.shape))
     if reduction_object.n_components < Configuration.MAX_FEATURES:
         if reduction_object.__class__.__name__ == "PCA":
             logging.warning("Reduction done using:{0}".format(reduction_object.__class__.__name__))
@@ -109,14 +109,16 @@ def reduce_dimensions(x, y, x_val, y_val, reduction_object):
             x = reduction_object.transform(x)
             x_val = reduction_object.transform(x_val)
     else:
-        logging.warning("Skipping reduction. Coponents to reduce:{0} equal to max dataset dimensionality:{1}".format(reduction_object.n_components, Configuration.MAX_FEATURES))
+        logging.warning("Skipping reduction. Coponents to reduce:{0} equal to max dataset dimensionality:{1}".format(
+            reduction_object.n_components, Configuration.MAX_FEATURES))
 
     logging.warning("After reduction shape:{0}".format(x.shape))
     return x, y, x_val, y_val
 
 
 def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
-    logging.warning("Testing extraction method:{0} for x shape:{1}".format(reduction_object.__class__.__name__, x.shape))
+    logging.warning(
+        "Testing extraction method:{0} for x shape:{1}".format(reduction_object.__class__.__name__, x.shape))
 
     svm_scores = list()
     ann_scores = list()
@@ -130,15 +132,14 @@ def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
     suffix = str(len(x))
     file_prefix = 'digits_' + suffix
 
-
-
-    for i in range(1,6):
+    for i in range(1, 10):
         suffix = str(len(x))
         file_prefix = 'digits_' + suffix
 
         config = determine_parameters_all(x_train, y_train, x_test, y_test)
 
-        logging.warning('I:{0} \t Method:{1} Components_n:{2} result_file_prefix:{3}'.format(i, type(reduction_object).__name__,
+        logging.warning(
+            'I:{0} \t Method:{1} Components_n:{2} result_file_prefix:{3}'.format(i, type(reduction_object).__name__,
                                                                                  reduction_object.n_components,
                                                                                  file_prefix))
 
@@ -151,7 +152,7 @@ def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
         ann_scores.append(ann_score)
         decision_tree_scores.append(decision_tree_score)
         random_forest_scores.append(random_forest_score)
-        
+
     save_results(file_prefix, 'svm', reduction_object, svm_scores)
     save_results(file_prefix, 'ann', reduction_object, ann_scores)
     save_results(file_prefix, 'forest', reduction_object, random_forest_scores)
@@ -159,8 +160,10 @@ def test_given_extraction_method(x, y, x_val, y_val, reduction_object):
 
 
 def save_results(file_prefix, method_name, reduction_object, scores):
-    with open(result_folder + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat', 'a') as output:
-        output.write(str(reduction_object.n_components) + "\t" + str(np.mean(scores)) + '\t' + str(np.std(scores)) + '\n')   
+    with open(result_folder + file_prefix + '_' + method_name + '_' + str(type(reduction_object).__name__) + '.dat',
+              'a') as output:
+        output.write(
+            str(reduction_object.n_components) + "\t" + str(np.mean(scores)) + '\t' + str(np.std(scores)) + '\n')
 
 
 def fit_and_score_svm(x_train, y_train, x_test, y_test, config):
@@ -170,10 +173,10 @@ def fit_and_score_svm(x_train, y_train, x_test, y_test, config):
 
 
 def fit_and_score_ann(x_train, y_train, x_test, y_test, config):
-    ann = MLPClassifier(solver=config.ann.solver, 
-                        max_iter=Configuration.ANN_MAX_ITERATIONS, 
-                        alpha=config.ann.alpha, 
-                        hidden_layer_sizes=(config.ann.hidden_neurons,), 
+    ann = MLPClassifier(solver=config.ann.solver,
+                        max_iter=Configuration.ANN_MAX_ITERATIONS,
+                        alpha=config.ann.alpha,
+                        hidden_layer_sizes=(config.ann.hidden_neurons,),
                         learning_rate='adaptive')
 
     ann.fit(x_train, y_train)
@@ -187,7 +190,8 @@ def fit_and_score_decision_tree(x_train, y_train, x_test, y_test, config):
 
 
 def fit_and_score_random_forest(x_train, y_train, x_test, y_test, config):
-    forest = RandomForestClassifier(max_depth=config.random_forest.max_depth, n_estimators=config.random_forest.n_estimators)
+    forest = RandomForestClassifier(max_depth=config.random_forest.max_depth,
+                                    n_estimators=config.random_forest.n_estimators)
     forest.fit(x_train, y_train)
     return forest.score(x_test, y_test)
 
@@ -198,8 +202,7 @@ def determine_parameters(optimizer):
 
 
 def create_next_directory(directory):
-
-    for i in range(0,10000):
+    for i in range(0, 10000):
 
         new_name = directory[:-1] + str(i) + '/'
         if not os.path.exists(new_name):
@@ -211,4 +214,3 @@ def create_next_directory(directory):
 
 if __name__ == '__main__':
     main()
-
