@@ -48,7 +48,7 @@ def configure_logging():
 def calculate(x_all, y_all):
     logging.warning('calculate')
 
-    x_all, x_val, y_all, y_val = train_test_split(x_all, y_all, test_size=50, random_state=Utils.get_seed())
+    x_all, x_val, y_all, y_val = train_test_split(x_all, y_all, test_size=40, random_state=Utils.get_seed())
 
     # calculate for different train data size
     for train_data_size in Configuration.SAMPLES_N:
