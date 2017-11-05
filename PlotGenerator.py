@@ -12,11 +12,6 @@ matplotlib.rc('font', family='Arial')
 import numpy as np
 import sys
 
-pca300 = []
-lda300 = []
-pca600 = []
-lda600 = []
-
 results_dir = sys.argv[1]
 
 
@@ -36,17 +31,7 @@ def main():
         # plot_and_save_all_ml_methods(directory, set_name, x_num, 'PCA', '.pdf')
         plot_and_save_all_ml_methods(directory, set_name, x_num, 'LinearDiscriminantAnalysis', '.pdf')
 
-    global pca300
-    global lda300
-    global pca600
-    global lda600
-
-    print "Better performance for {0} {1} is : {2}".format('PCA', '300', round_to_2_decimal(np.mean(pca300)))
-    print "Better performance for {0} {1} is : {2}".format('LDA', '300', round_to_2_decimal(np.mean(lda300)))
-    print "Better performance for {0} {1} is : {2}".format('PCA', '600', round_to_2_decimal(np.mean(pca600)))
-    print "Better performance for {0} {1} is : {2}".format('LDA', '600', round_to_2_decimal(np.mean(lda600)))
-
-
+   
 def plot_and_save_all_ml_methods(directory, set_name='digits', x_num='1500', reduction_method='PCA',
                                  format='.pdf'):
     ml_methods = ['ann', 'svm', 'forest', 'tree']
@@ -72,12 +57,21 @@ def construct_path(directory, set_name='digits', x_num='1500', ml_method='svm', 
 
 i = 0
 
+def print_rounded(feature_nums, scores, stds, ml_method, x_num):
+    
+    for score, std, feature_num in zip(scores, stds, feature_nums):
+            print "{0} {1} {2} {3} {4}".format(x_num, ml_method, feature_num, round_to_2_decimal(score), round_to_2_decimal(std))
+
+
+
 
 def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color='b'):
     data = read_data(file_name)
     feature_nums, scores, stds = prepare_data(data)
 
     scores, stds = np.array(scores), np.array(stds)
+
+    print_rounded(feature_nums, scores, stds, ml_method, x_num)
 
     ax.plot(feature_nums, scores, color=color, label=ml_method)
 
@@ -97,59 +91,7 @@ def plot_from_file(ax, ml_method, file_name, reduction_method, x_num, color='b')
     plt.ylabel(u'skuteczność +/- odchyelenie standardowe')
     plt.xlabel(u'liczba atrybutów')
 
-    bestScore = np.max(scores)
-    bestIndex = scores.tolist().index(bestScore)
-
-    red_met_str = ''
-
-    if reduction_method == 'PCA':
-        red_met_str = 'PCA'
-    else:
-        red_met_str = 'LDA'
-
-    global i
-
-    if i % 2 == 0:
-        rowcolor = '\\rowcolor{Gray}'
-    else:
-        rowcolor = '\\rowcolor{White}'
-
-    i += 1
-
-    print rowcolor
-    print '$' + str(round_to_2_decimal(bestScore)) + ' \pm ' + str(round_to_2_decimal(stds[bestIndex])) + '$ & $' + str(
-        int(feature_nums[bestIndex])) + '$ & $ ' + str(x_num) + ' $ & ' + red_met_str + ' & ' + ml_method + ' \\\\'
-    print "\hline"
-    print rowcolor
-
-    '''
-    score_max_features = str(round_to_2_decimal(scores[Configuration.MAX_FEATURES - 1]))
-    std_max_features = str(round_to_2_decimal(stds[Configuration.MAX_FEATURES - 1]))
-    s_max_features = str(int(Configuration.MAX_FEATURES))
-
-    print '$' + score_max_features + ' \pm ' + str(std_max_features) + '$ & $' + s_max_features + '$ & $ ' + str(x_num) + ' $ & ' + '-' + ' & ' + ml_method + ' \\\\'
-
-    betterPerformance = bestScore - scores[len(scores) - 1]
-
-    global pca300
-    global lda300
-    global pca600
-    global lda600
-
-    if red_met_str == 'PCA' and str(x_num) == str(300):
-        pca300.append(betterPerformance)
-    if red_met_str == 'LDA' and str(x_num) == str(300):
-        lda300.append(betterPerformance)
-    if red_met_str == 'PCA' and str(x_num) == str(600):
-        pca600.append(betterPerformance)
-    if red_met_str == 'LDA' and str(x_num) == str(600):
-        lda600.append(betterPerformance)
-    '''
-
-    # print "Best for method: {0} is {1} for {2} features".format(ml_method, bestScore, feature_nums[bestIndex])
-    # print "Score for 64 features is: {0} is {1}".format(ml_method, scores[len(scores)-1])
-    print "\hline"
-
+    
     ax.axhline(np.max(scores), linestyle='--', color=color)
 
     plt.xlim([feature_nums[0], feature_nums[-1]])
